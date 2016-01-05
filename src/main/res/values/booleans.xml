@@ -1,0 +1,9 @@
+<resources>
+
+    <bool name="nc__api_version_header_enabled">false</bool>
+
+    <bool name="nc__api_basic_auth_enabled">false</bool>
+
+    <bool name="nc__log_enabled">false</bool>
+
+</resources>

@@ -1,0 +1,19 @@
+<resources>
+
+    <string name="nc__api_url">http://some_url.com/api/v1</string>
+    <string name="nc__api_encoding">UTF-8</string>
+
+    <string name="nc__api_basic_auth_username">some_user</string>
+    <string name="nc__api_basic_auth_password">some_pass</string>
+
+    <string name="nc__api_version_header_name">API-Version</string>
+    <string name="nc__api_version_header_value">some_value</string>
+
+    <string name="nc__api_property_accept">application/json</string>
+    <string name="nc__api_property_content_type">application/json</string>
+    <string name="nc__api_property_accept_encoding">gzip</string>
+
+    <string name="nc__error_connection">A connection-related error has occurred!</string>
+    <string name="nc__error_unknown">Something went wrong!</string>
+
+</resources>
