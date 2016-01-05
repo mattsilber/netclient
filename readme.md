@@ -44,7 +44,13 @@ And with a POST request...
 
 ### Configuration
 
-In order to use the ApiRequest, you need to override some String resources. Assuming you're using a JSON-based API, you only need to override *R.string.nc__api_url* to hook up. When making API Requests, you don't need to include the API Url as it is prepended for you.
+In order to use the ApiRequest, you need to override some String resources. Assuming you're using a JSON-based API, you only need to override
+
+    <string name="nc__api_url">http://some_url.com/api/v1/</string>
+
+When making API Requests, you don't need to include the API Url as it is prepended for you.
+
+**Note:** The trailing slash in the API Url is more important than it should be...
 
 If you want to enable Basic Auth, just set *R.boolean.nc__api_basic_auth_enabled* to true, then override
 
