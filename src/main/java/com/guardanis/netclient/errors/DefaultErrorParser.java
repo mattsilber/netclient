@@ -27,13 +27,13 @@ public class DefaultErrorParser implements ErrorParser {
         if(!result.isSuccessful() || !result.isResponseCodeKnown()){
             JSONObject obj = null;
             try{
-                obj = new JSONObject(result.getUnparsedResponse());
+                obj = result.getResponseJson();
             }
-            catch(Exception e){ }
+            catch(Exception e){ e.printStackTrace(); }
 
-            if(result.isResponseCodeKnown() && obj == null)
-                errorMessages.add(context.getString(R.string.nc__error_unknown));
-            else if(obj != null) parseErrors(result, obj);
+            if(obj != null)
+                return parseErrors(result, obj);
+            else errorMessages.add(context.getString(R.string.nc__error_unknown));
         }
 
         return errorMessages;
@@ -43,9 +43,9 @@ public class DefaultErrorParser implements ErrorParser {
         List<String> errorMessages = new ArrayList<String>();
 
         JSONObject errors = obj.optJSONObject("errors");
-        if(errors == null && !result.isSuccessful())
+        if(errors == null)
             errorMessages.add(obj.optString("error", context.getString(R.string.nc__error_unknown)));
-        else parseErrorsList(errors);
+        else return parseErrorsList(errors);
 
         return errorMessages;
     }

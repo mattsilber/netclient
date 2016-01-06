@@ -48,7 +48,7 @@ ext {
     artifact = 'netclient'
 
     libraryDescription = 'A stupid-simple wrapper around HTTP/S-UrlConnection'
-    libraryVersion = '1.0.1'
+    libraryVersion = '1.0.2'
 
     developerId = 'mattsilber'
     developerName = 'Matt Silber'
