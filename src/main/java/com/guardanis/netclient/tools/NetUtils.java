@@ -26,9 +26,12 @@ public class NetUtils {
     private Context context;
     private String apiUrl;
 
+    private boolean loggingEnabled;
+
     protected NetUtils(Context context){
         this.context = context.getApplicationContext();
         this.apiUrl = context.getString(R.string.nc__api_url);
+        this.loggingEnabled = context.getResources().getBoolean(R.bool.nc__log_enabled);
     }
 
     public String getApiUrl(){
@@ -93,7 +96,7 @@ public class NetUtils {
     }
 
     public void log(String message){
-        if(context.getResources().getBoolean(R.bool.nc__log_enabled))
+        if(loggingEnabled)
             Log.d(TAG, message);
     }
 

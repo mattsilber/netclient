@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.HttpsURLConnection;
 
 import com.guardanis.netclient.NetInterface.*;
+import com.guardanis.netclient.errors.RequestCanceledError;
 import com.guardanis.netclient.errors.GeneralError;
 import com.guardanis.netclient.tools.InputStreamHelper;
 import com.guardanis.netclient.tools.NetUtils;
@@ -56,7 +57,9 @@ public class WebRequest<T> implements Runnable {
     protected FailListener failListener;
 
     protected Looper originatingLooper;
+
     protected boolean canceled = false;
+    protected boolean failOnCancel = false;
 
     public WebRequest(Context context, ConnectionType connectionType){
         this(context, connectionType, "");
@@ -71,6 +74,13 @@ public class WebRequest<T> implements Runnable {
     public WebRequest<T> setTargetUrl(String targetUrl){
         this.targetUrl = NetUtils.getInstance(context).getApiUrl() + targetUrl.trim();
         return this;
+    }
+
+    /**
+     * Set Jsonable. Throws RuntimeException if there's an issue with the Jsonable
+     */
+    public WebRequest<T> setData(Jsonable data){
+        return setData(data.toJson());
     }
 
     public WebRequest<T> setData(JSONObject data){
@@ -94,6 +104,11 @@ public class WebRequest<T> implements Runnable {
 
     public WebRequest<T> onFail(FailListener failListener){
         this.failListener = failListener;
+        return this;
+    }
+
+    public WebRequest<T> setFailOnCancel(boolean failOnCancel){
+        this.failOnCancel = failOnCancel;
         return this;
     }
 
@@ -206,6 +221,15 @@ public class WebRequest<T> implements Runnable {
 
     public void cancel(){
         this.canceled = true;
+
+        if(failOnCancel){
+            new Handler(originatingLooper).post(new Runnable(){
+                public void run(){
+                    if(failListener != null)
+                        failListener.onFail(new RequestCanceledError(context));
+                }
+            });
+        }
     }
 
 }

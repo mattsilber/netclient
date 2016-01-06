@@ -15,5 +15,7 @@
 
     <string name="nc__error_connection">A connection-related error has occurred!</string>
     <string name="nc__error_unknown">Something went wrong!</string>
+    <string name="nc__error_canceled">You canceled before the operation could complete!</string>
+    <string name="nc__error_bad_data">Bad data!</string>
 
 </resources>
