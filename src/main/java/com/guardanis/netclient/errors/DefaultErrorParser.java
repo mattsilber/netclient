@@ -1,6 +1,7 @@
 package com.guardanis.netclient.errors;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.guardanis.netclient.R;
 import com.guardanis.netclient.WebResult;
@@ -24,22 +25,21 @@ public class DefaultErrorParser implements ErrorParser {
     public List<String> parseErrorMessages(WebResult result) {
         List<String> errorMessages = new ArrayList<String>();
 
-        if(!result.isSuccessful() || !result.isResponseCodeKnown()){
-            JSONObject obj = null;
-            try{
-                obj = result.getResponseJson();
-            }
-            catch(Exception e){ e.printStackTrace(); }
+        try{
+            JSONObject potentialErrors = result.getResponseJson();
 
-            if(obj != null)
-                return parseErrors(result, obj);
-            else errorMessages.add(context.getString(R.string.nc__error_unknown));
+            if(potentialErrors != null)
+                errorMessages = parseErrors(potentialErrors);
         }
+        catch(Exception e){ e.printStackTrace(); }
+
+        if(!result.isSuccessful() && errorMessages.size() < 1)
+            errorMessages.add(context.getString(R.string.nc__error_unknown));
 
         return errorMessages;
     }
 
-    private List<String> parseErrors(WebResult result, JSONObject obj) {
+    private List<String> parseErrors(JSONObject obj) {
         List<String> errorMessages = new ArrayList<String>();
 
         JSONObject errors = obj.optJSONObject("errors");
@@ -60,8 +60,14 @@ public class DefaultErrorParser implements ErrorParser {
                 String messageTitle = getBaseErrorTitle(title);
 
                 JSONArray messageArray = errors.optJSONArray(title);
-                for(int j = 0; j < messageArray.length(); j++)
-                    errorMessages.add((messageTitle.length() < 1 ? "" : (messageTitle + " ")) + messageArray.getString(j) + ".");
+                for(int j = 0; j < messageArray.length(); j++){
+                    String message = (messageTitle.length() < 1 ? "" : (messageTitle + " ")) + messageArray.getString(j);
+
+                    if(Character.isLetter(message.charAt(message.length() - 1)))
+                        message += ".";
+
+                    errorMessages.add(message);
+                }
             }
         }
         catch(Exception e){ e.printStackTrace(); }
