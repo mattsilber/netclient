@@ -42,10 +42,10 @@ public class DefaultErrorParser implements ErrorParser {
     private List<String> parseErrors(JSONObject obj) {
         List<String> errorMessages = new ArrayList<String>();
 
-        JSONObject errors = obj.optJSONObject("errors");
-        if(errors == null)
+        if(obj.has("errors"))
+            return parseErrorsList(obj.optJSONObject("errors"));
+        else if(obj.has("error"))
             errorMessages.add(obj.optString("error", context.getString(R.string.nc__error_unknown)));
-        else return parseErrorsList(errors);
 
         return errorMessages;
     }
