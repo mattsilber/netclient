@@ -24,6 +24,8 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 22
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -33,8 +35,21 @@ android {
     }
 }
 
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile 'org.json:json:20140107'
+
+    androidTestCompile 'com.android.support:support-annotations:22.0.1'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
 }
 
 group = 'com.guardanis'
@@ -48,7 +63,7 @@ ext {
     artifact = 'netclient'
 
     libraryDescription = 'A stupid-simple wrapper around HTTP/S-UrlConnection'
-    libraryVersion = '1.0.2'
+    libraryVersion = '1.0.3'
 
     developerId = 'mattsilber'
     developerName = 'Matt Silber'
