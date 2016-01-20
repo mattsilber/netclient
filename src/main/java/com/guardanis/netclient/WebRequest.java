@@ -72,7 +72,7 @@ public class WebRequest<T> implements Runnable {
     }
 
     public WebRequest<T> setTargetUrl(String targetUrl){
-        this.targetUrl = NetUtils.getInstance(context).getApiUrl() + targetUrl.trim();
+        this.targetUrl = targetUrl.trim();
         return this;
     }
 

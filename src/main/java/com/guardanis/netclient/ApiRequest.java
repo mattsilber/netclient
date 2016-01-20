@@ -21,6 +21,12 @@ public class ApiRequest<T> extends WebRequest<T> {
     }
 
     @Override
+    public ApiRequest<T> setTargetUrl(String targetUrl){
+        this.targetUrl = NetUtils.getInstance(context).getApiUrl() + targetUrl.trim();
+        return this;
+    }
+
+    @Override
     protected void setRequestProperties(HttpURLConnection conn){
         super.setRequestProperties(conn);
 
