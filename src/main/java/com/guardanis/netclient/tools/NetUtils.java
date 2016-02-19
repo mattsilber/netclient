@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.guardanis.netclient.R;
+import com.guardanis.netclient.errors.DefaultErrorParser;
+import com.guardanis.netclient.errors.ErrorParser;
 
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
@@ -28,10 +30,14 @@ public class NetUtils {
 
     private boolean loggingEnabled;
 
+    private static ErrorParser defaultApiErrorParser;
+
     protected NetUtils(Context context){
         this.context = context.getApplicationContext();
         this.apiUrl = context.getString(R.string.nc__api_url);
         this.loggingEnabled = context.getResources().getBoolean(R.bool.nc__log_enabled);
+
+        NetUtils.defaultApiErrorParser = new DefaultErrorParser(context.getApplicationContext());
     }
 
     public String getApiUrl(){
@@ -65,7 +71,8 @@ public class NetUtils {
     }
 
     public boolean isApiVersionHeaderEnabled(){
-        return context.getResources().getBoolean(R.bool.nc__api_version_header_enabled);
+        return context.getResources()
+                .getBoolean(R.bool.nc__api_version_header_enabled);
     }
 
     public String getContentTypeProperty(){
@@ -93,6 +100,14 @@ public class NetUtils {
 
     public String getUrlEncodedValue(String toEncode) throws Exception {
         return URLEncoder.encode(toEncode, context.getString(R.string.nc__api_encoding));
+    }
+
+    public static void setDefaultApiErrorParser(ErrorParser parser){
+        NetUtils.defaultApiErrorParser = parser;
+    }
+
+    public static ErrorParser getDefaultApiErrorParser(){
+        return NetUtils.defaultApiErrorParser;
     }
 
     public void log(String message){

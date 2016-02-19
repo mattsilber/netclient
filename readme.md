@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.6')
+        compile('com.guardanis:netclient:1.0.7')
     }
 ```
 
@@ -64,8 +64,9 @@ If you need an API-Version header, just set *R.bool.nc__api_version_header_enabl
 
 If you want to log requests and response data, set *R.bool.nc__log_enabled* to true.
 
+If you want to use a separate **ErrorParser**, you can either manually attach one via **setErrorParser(ErrorParser)** for specific requests, or set the default ErrorParser for ApiRequests via **NetUtils.setDefaultApiErrorParser(ErrorParser)**. If you're doing that, I'd recommend it be done in your Application's onCreate().
+
 There are a few other things you can configure, including several request properties, but if you need more control you can just extend ApiRequest.
 
 # Limitations, Known Issues, and ToDo's
 * Accept custom SSLSocketFactory for HttpsUrlConnections
-* Accept custom ErrorParser instead of just DefaultErrorParser

@@ -20,8 +20,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.HttpsURLConnection;
 
 import com.guardanis.netclient.NetInterface.*;
+import com.guardanis.netclient.errors.ApiError;
+import com.guardanis.netclient.errors.DefaultErrorParser;
+import com.guardanis.netclient.errors.ErrorParser;
 import com.guardanis.netclient.errors.RequestCanceledError;
 import com.guardanis.netclient.errors.GeneralError;
+import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.tools.InputStreamHelper;
 import com.guardanis.netclient.tools.NetUtils;
 import com.guardanis.netclient.tools.OutputStreamHelper;
@@ -60,6 +64,8 @@ public class WebRequest<T> implements Runnable {
 
     protected boolean canceled = false;
     protected boolean failOnCancel = false;
+
+    protected ErrorParser errorParser;
 
     public WebRequest(Context context, ConnectionType connectionType){
         this(context, connectionType, "");
@@ -109,6 +115,11 @@ public class WebRequest<T> implements Runnable {
 
     public WebRequest<T> setFailOnCancel(boolean failOnCancel){
         this.failOnCancel = failOnCancel;
+        return this;
+    }
+
+    public WebRequest<T> setErrorParser(ErrorParser errorParser){
+        this.errorParser = errorParser;
         return this;
     }
 
@@ -198,8 +209,29 @@ public class WebRequest<T> implements Runnable {
     }
 
     protected void onResponseReceived(WebResult result) throws Exception {
-        final T parsedResult = responseParser.parse(result);
+        final RequestError errors = getErrorsFromResult(result);
 
+        if(errors != null && errors.hasErrors())
+            failWith(errors);
+        else finishWith(responseParser.parse(result));
+    }
+
+    protected RequestError getErrorsFromResult(WebResult result){
+        return errorParser == null
+                ? null
+                : new ApiError(result, errorParser);
+    }
+
+    protected void failWith(final RequestError errors){
+        postToOriginalThread(new Runnable() {
+            public void run() {
+                if(failListener != null)
+                    failListener.onFail(errors);
+            }
+        });
+    }
+
+    protected void finishWith(final T parsedResult){
         postToOriginalThread(new Runnable() {
             public void run() {
                 if(successListener != null)

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.guardanis.netclient.errors.ApiError;
 import com.guardanis.netclient.errors.DefaultErrorParser;
+import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.tools.NetUtils;
 
 import java.net.HttpURLConnection;
@@ -45,16 +46,11 @@ public class ApiRequest<T> extends WebRequest<T> {
     }
 
     @Override
-    protected void onResponseReceived(WebResult result) throws Exception {
-        final ApiError errors = new ApiError(result, new DefaultErrorParser(context));
-        if(errors.hasErrors()){
-            postToOriginalThread(new Runnable() {
-                public void run() {
-                    if(failListener != null)
-                        failListener.onFail(errors);
-                }
-            });
-        }
-        else super.onResponseReceived(result);
+    protected RequestError getErrorsFromResult(WebResult result){
+        if(errorParser == null)
+            return NetUtils.getDefaultApiErrorParser() == null
+                    ? null
+                    : new ApiError(result, NetUtils.getDefaultApiErrorParser());
+        else return super.getErrorsFromResult(result);
     }
 }
