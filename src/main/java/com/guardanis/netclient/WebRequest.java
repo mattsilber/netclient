@@ -9,6 +9,8 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,6 +57,8 @@ public class WebRequest<T> implements Runnable {
     protected ConnectionType connectionType;
     protected String targetUrl = "";
 
+    protected Map<String, String> requestProperties = new HashMap<String, String>();
+
     protected String data;
     protected ResponseParser<T> responseParser;
     protected SuccessListener<T> successListener;
@@ -95,6 +99,11 @@ public class WebRequest<T> implements Runnable {
 
     public WebRequest<T> setData(String data){
         this.data = data;
+        return this;
+    }
+
+    public WebRequest<T> addRequestProperty(String key, String value){
+        requestProperties.put(key, value);
         return this;
     }
 
@@ -171,6 +180,9 @@ public class WebRequest<T> implements Runnable {
     protected void setRequestProperties(HttpURLConnection conn){
         conn.setRequestProperty("Accept", NetUtils.getInstance(context).getAcceptProperty());
         conn.setRequestProperty("Content-type", NetUtils.getInstance(context).getContentTypeProperty());
+
+        for(String key : requestProperties.keySet())
+            conn.setRequestProperty(key, requestProperties.get(key));
     }
 
     protected URL buildUrl() throws MalformedURLException {
