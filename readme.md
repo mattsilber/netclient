@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.7')
+        compile('com.guardanis:netclient:1.0.8')
     }
 ```
 
@@ -68,5 +68,52 @@ If you want to use a separate *ErrorParser*, you can either manually attach one 
 
 There are a few other things you can configure, including several request properties, but if you need more control you can just extend ApiRequest.
 
+### SSL Support
+If you would like to use an SSL connection for your WebRequests, as of version 1.0.8, you must either provide a BKS Keystore file and a password (default cert is configurable through resources by overriding *R.string.nc__ssl_cert_password* and the actual keystore file, *R.raw.nc__cert.bks*) to the WebRequest, or you must disable the SSL security measures by calling *setSslUnsafeModeEnabled(boolean unsafeSslModeEnabled)* to accept all certificates.
+
+Note: You shouldn't disable the certificates in production; it's strictly meant for development.
+
+If you need help generating the required files, check the wiki.
+
+### Multi-API Support
+It's absolutely possible to work with multiple API's, but it's not currently configurable via overriding resources. If you want to implement the ApiRequest pattern for a secondary API, you can extends the ApiRequest class and override the configuration methods. The following template can help you do that pretty easily:
+
+    public class SomeApiRequest<T> extends com.guardanis.netclient.ApiRequest<T> {
+
+        public SomeApiRequest(Context context, ConnectionType connectionType) {
+            this(context, connectionType, "");
+        }
+
+        public SomeApiRequest(Context context, ConnectionType connectionType, String targetUrl) {
+            super(context, connectionType, targetUrl);
+
+            setErrorParser(new DefaultErrorParser(context)); // Set your error parser     
+            setSslCertificateInfo(R.raw.some_api_cert, context.getString(R.string.some_api_cert_password)); // Set the SSL cert info if you're using it   
+        }
+
+        @Override
+        public SomeApiRequest<T> setTargetUrl(String targetUrl){
+            this.targetUrl = "https://some_api.com/api/v1/" + targetUrl.trim();
+            return this;
+        }
+
+        @Override
+        protected void setRequestProperties(HttpURLConnection conn){
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Content-type", "application/json");
+            conn.setRequestProperty("Accept-Encoding", "gzip");
+
+            for(String key : requestProperties.keySet())
+                conn.setRequestProperty(key, requestProperties.get(key));
+        }
+
+        @Override
+        protected URL buildUrl() throws MalformedURLException {
+            return new URL(targetUrl);
+        }
+    }
+
+You could then use SomeApiRequest the same way you would the normal ApiRequest.
+
 # Limitations, Known Issues, and ToDo's
-* Accept custom SSLSocketFactory for HttpsUrlConnections
+* Accept more than just a single BKS for SSLSocketFactory's TrustManager for HttpsUrlConnections
