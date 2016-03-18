@@ -71,6 +71,10 @@ public class WebRequest<T> implements Runnable {
 
     protected ErrorParser errorParser;
 
+    protected int sslCertResource = R.raw.nc__cert;
+    protected String sslCertPassword;
+    protected boolean unsafeSslModeEnabled = false;
+
     public WebRequest(Context context, ConnectionType connectionType){
         this(context, connectionType, "");
     }
@@ -78,6 +82,8 @@ public class WebRequest<T> implements Runnable {
     public WebRequest(Context context, ConnectionType connectionType, String targetUrl){
         this.context = context;
         this.connectionType = connectionType;
+        this.sslCertPassword = context.getString(R.string.nc__ssl_cert_keystore_password);
+
         setTargetUrl(targetUrl);
     }
 
@@ -132,6 +138,20 @@ public class WebRequest<T> implements Runnable {
         return this;
     }
 
+    public WebRequest<T> setSslCertificateInfo(int sslCertResource, String sslCertPassword){
+        this.sslCertResource = sslCertResource;
+        this.sslCertPassword = sslCertPassword;
+        return this;
+    }
+
+    /**
+     * Force the SSLSocketFactory to accept all certificates. Do not enable this in production.
+     */
+    public WebRequest<T> setSslUnsafeModeEnabled(boolean unsafeSslModeEnabled){
+        this.unsafeSslModeEnabled = unsafeSslModeEnabled;
+        return this;
+    }
+
     public WebRequest<T> execute(){
         this.originatingLooper = Looper.myLooper();
 
@@ -171,7 +191,13 @@ public class WebRequest<T> implements Runnable {
 
         if(targetUrl.startsWith("https://")){
             HttpURLConnection conn = (HttpsURLConnection) url.openConnection();
-            ((HttpsURLConnection)conn).setSSLSocketFactory(new CustomSSLSocketFactory().currentContext.getSocketFactory());
+
+            CustomSSLSocketFactory factory = unsafeSslModeEnabled
+                        ? CustomSSLSocketFactory.getUnsafeInstance()
+                        : CustomSSLSocketFactory.getInstance(context, sslCertResource, sslCertPassword);
+
+            ((HttpsURLConnection) conn).setSSLSocketFactory(factory.currentContext.getSocketFactory());
+
             return conn;
         }
         else return (HttpURLConnection) url.openConnection();
