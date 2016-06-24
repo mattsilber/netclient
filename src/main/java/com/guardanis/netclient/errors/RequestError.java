@@ -1,21 +1,7 @@
 package com.guardanis.netclient.errors;
 
-import android.content.Context;
-
-import com.guardanis.netclient.R;
-import com.guardanis.netclient.WebResult;
-
-import org.apache.http.HttpException;
-import org.apache.http.NoHttpResponseException;
-
-import java.io.InterruptedIOException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.SSLException;
 
 public class RequestError {
 

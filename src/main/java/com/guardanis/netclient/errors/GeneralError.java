@@ -4,9 +4,6 @@ import android.content.Context;
 
 import com.guardanis.netclient.R;
 
-import org.apache.http.HttpException;
-import org.apache.http.NoHttpResponseException;
-
 import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -39,8 +36,6 @@ public class GeneralError extends RequestError {
         return throwable != null &&
                 (throwable instanceof SocketTimeoutException
                 || throwable instanceof SocketException
-                || throwable instanceof HttpException
-                || throwable instanceof NoHttpResponseException
                 || throwable instanceof InterruptedIOException
                 || throwable instanceof UnknownHostException
                 || throwable instanceof SSLException);
