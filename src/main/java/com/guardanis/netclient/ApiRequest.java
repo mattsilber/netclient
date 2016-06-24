@@ -3,7 +3,6 @@ package com.guardanis.netclient;
 import android.content.Context;
 
 import com.guardanis.netclient.errors.ApiError;
-import com.guardanis.netclient.errors.DefaultErrorParser;
 import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.tools.NetUtils;
 

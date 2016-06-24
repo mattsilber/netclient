@@ -12,7 +12,10 @@ public class InputStreamHelper {
     private InputStream inputStream;
 
     public InputStreamHelper(HttpURLConnection conn) throws NullPointerException, IOException {
-        inputStream = conn.getResponseCode() < 400 ? conn.getInputStream() : conn.getErrorStream();
+        inputStream = conn.getResponseCode() < 400
+                ? conn.getInputStream()
+                : conn.getErrorStream();
+
         String contentEncoding = conn.getContentEncoding();
 
         if(contentEncoding != null && contentEncoding.equalsIgnoreCase("gzip"))
@@ -24,6 +27,7 @@ public class InputStreamHelper {
         String line;
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
         while((line = reader.readLine()) != null)
             response += line;
 

@@ -1,7 +1,6 @@
 package com.guardanis.netclient.errors;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.guardanis.netclient.R;
 import com.guardanis.netclient.WebResult;

@@ -41,12 +41,14 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
 
     @Override
     public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
-        return currentContext.getSocketFactory().createSocket(socket, host, port, autoClose);
+        return currentContext.getSocketFactory()
+                .createSocket(socket, host, port, autoClose);
     }
 
     @Override
     public Socket createSocket() throws IOException {
-        return currentContext.getSocketFactory().createSocket();
+        return currentContext.getSocketFactory()
+                .createSocket();
     }
 
     private class SingleX509TrustManager implements X509TrustManager {

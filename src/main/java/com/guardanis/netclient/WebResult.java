@@ -32,9 +32,11 @@ public class WebResult {
     public boolean isResponseJson() {
         try{
             new JSONObject(unparsedResponse);
+
             return true;
         }
-        catch(Exception e){ }
+        catch(JSONException e){ }
+
         return false;
     }
 

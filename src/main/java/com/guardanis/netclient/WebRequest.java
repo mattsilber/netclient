@@ -4,6 +4,19 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.guardanis.netclient.NetInterface.FailListener;
+import com.guardanis.netclient.NetInterface.Jsonable;
+import com.guardanis.netclient.NetInterface.ResponseParser;
+import com.guardanis.netclient.NetInterface.SuccessListener;
+import com.guardanis.netclient.errors.ApiError;
+import com.guardanis.netclient.errors.ErrorParser;
+import com.guardanis.netclient.errors.GeneralError;
+import com.guardanis.netclient.errors.RequestCanceledError;
+import com.guardanis.netclient.errors.RequestError;
+import com.guardanis.netclient.tools.InputStreamHelper;
+import com.guardanis.netclient.tools.NetUtils;
+import com.guardanis.netclient.tools.OutputStreamHelper;
+
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
@@ -20,17 +33,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import com.guardanis.netclient.NetInterface.*;
-import com.guardanis.netclient.errors.ApiError;
-import com.guardanis.netclient.errors.DefaultErrorParser;
-import com.guardanis.netclient.errors.ErrorParser;
-import com.guardanis.netclient.errors.RequestCanceledError;
-import com.guardanis.netclient.errors.GeneralError;
-import com.guardanis.netclient.errors.RequestError;
-import com.guardanis.netclient.tools.InputStreamHelper;
-import com.guardanis.netclient.tools.NetUtils;
-import com.guardanis.netclient.tools.OutputStreamHelper;
 
 public class WebRequest<T> implements Runnable {
 

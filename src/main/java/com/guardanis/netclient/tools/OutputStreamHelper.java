@@ -1,12 +1,8 @@
 package com.guardanis.netclient.tools;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.util.zip.GZIPInputStream;
 
 public class OutputStreamHelper {
 
