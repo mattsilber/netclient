@@ -7,6 +7,8 @@ import com.guardanis.netclient.R;
 import com.guardanis.netclient.errors.DefaultErrorParser;
 import com.guardanis.netclient.errors.ErrorParser;
 
+import java.io.Closeable;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -65,7 +67,7 @@ public class NetUtils {
     }
 
     public void addVersionRequestProperty(HttpURLConnection conn){
-        if(isBasicAuthEnabled())
+        if(isApiVersionHeaderEnabled())
             conn.setRequestProperty(context.getString(R.string.nc__api_version_header_name),
                     context.getString(R.string.nc__api_version_header_value));
     }
@@ -83,23 +85,21 @@ public class NetUtils {
         return context.getString(R.string.nc__api_property_accept);
     }
 
-    public String getAcceptEncodingProperty(){
-        return context.getString(R.string.nc__api_property_accept_encoding);
-    }
-
-    public String encodeParams(Map<String, String> params) throws Exception {
+    public String encodeParams(Map<String, String> params) throws UnsupportedEncodingException {
         if(params == null)
             return "";
 
         String encoded = "";
+
         for(String key : params.keySet())
             encoded += getUrlEncodedValue(key) + "=" + getUrlEncodedValue(params.get(key)) + "&";
 
         return encoded.substring(0, encoded.length() - 1);
     }
 
-    public String getUrlEncodedValue(String toEncode) throws Exception {
-        return URLEncoder.encode(toEncode, context.getString(R.string.nc__api_encoding));
+    public String getUrlEncodedValue(String toEncode) throws UnsupportedEncodingException {
+        return URLEncoder.encode(toEncode,
+                context.getString(R.string.nc__api_encoding));
     }
 
     public static void setDefaultApiErrorParser(ErrorParser parser){
@@ -108,6 +108,14 @@ public class NetUtils {
 
     public static ErrorParser getDefaultApiErrorParser(){
         return NetUtils.defaultApiErrorParser;
+    }
+
+    public static void close(Closeable closeable){
+        try{
+            if(closeable != null)
+                closeable.close();
+        }
+        catch(Throwable e){ e.printStackTrace(); }
     }
 
     public void log(String message){

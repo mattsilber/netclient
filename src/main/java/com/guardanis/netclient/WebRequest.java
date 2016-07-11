@@ -19,6 +19,7 @@ import com.guardanis.netclient.tools.OutputStreamHelper;
 
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -213,7 +214,7 @@ public class WebRequest<T> implements Runnable {
             conn.setRequestProperty(key, requestProperties.get(key));
     }
 
-    protected URL buildUrl() throws MalformedURLException {
+    protected URL buildUrl() throws MalformedURLException, UnsupportedEncodingException {
         return new URL(targetUrl);
     }
 

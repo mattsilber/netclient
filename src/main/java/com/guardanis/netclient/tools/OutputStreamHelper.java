@@ -24,11 +24,7 @@ public class OutputStreamHelper {
     }
 
     public void closeConnection() {
-        try{
-            if(writer != null)
-                writer.close();
-        }
-        catch(Exception e){ }
+        NetUtils.close(writer);
 
         connection = null;
     }

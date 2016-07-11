@@ -6,6 +6,7 @@ import com.guardanis.netclient.errors.ApiError;
 import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.tools.NetUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,18 +31,14 @@ public class ApiRequest<T> extends WebRequest<T> {
     protected void setRequestProperties(HttpURLConnection conn){
         super.setRequestProperties(conn);
 
-        NetUtils.getInstance(context)
-                .addBasicAuthRequestProperty(conn);
-
-        NetUtils.getInstance(context)
-                .addVersionRequestProperty(conn);
-
-        conn.setRequestProperty("Accept-Encoding", NetUtils.getInstance(context).getAcceptEncodingProperty());
+        GlobalApiRequestProperties.getInstance(context)
+                .addProperties(conn);
     }
 
     @Override
-    protected URL buildUrl() throws MalformedURLException {
-        return new URL(GlobalApiUrlParams.getInstance(context).addAdditions(targetUrl));
+    protected URL buildUrl() throws MalformedURLException, UnsupportedEncodingException {
+        return new URL(GlobalApiUrlParams.getInstance(context)
+                .addAdditions(targetUrl));
     }
 
     @Override

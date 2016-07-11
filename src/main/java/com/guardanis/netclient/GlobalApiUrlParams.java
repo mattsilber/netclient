@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.guardanis.netclient.tools.NetUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class GlobalApiUrlParams {
         return instance;
     }
 
-    private static final String PREFS = "global_api_params_prefs";
+    private static final String PREFS = "nc__global_api_url_params";
     private static final String PREF_KEY_PRE = "addition_";
 
     private Context context;
@@ -35,32 +36,36 @@ public class GlobalApiUrlParams {
         }
     }
 
-    public void register(String key, String value) {
+    public GlobalApiUrlParams register(String key, String value) {
         globalUrlAdditions.put(key, value);
 
         context.getSharedPreferences(PREFS, 0)
                 .edit()
                 .putString(PREF_KEY_PRE + key, value)
                 .commit();
+
+        return this;
     }
 
-    public void unregister(String key) {
+    public GlobalApiUrlParams unregister(String key) {
         globalUrlAdditions.remove(key);
 
         context.getSharedPreferences(PREFS, 0)
                 .edit()
                 .remove(PREF_KEY_PRE + key)
                 .commit();
+
+        return this;
     }
 
-    public String addAdditions(String url) {
+    public String addAdditions(String url) throws UnsupportedEncodingException {
         if(!globalUrlAdditions.isEmpty()){
-            url += url.contains("?") ? "&" : "?";
+            url += url.contains("?")
+                    ? "&"
+                    : "?";
 
-            for(String key : globalUrlAdditions.keySet())
-                url += key + "=" + globalUrlAdditions.get(key) + "&";
-
-            url = url.substring(0, url.length() - 1);
+            url += NetUtils.getInstance(context)
+                    .encodeParams(globalUrlAdditions);
         }
 
         NetUtils.getInstance(context)

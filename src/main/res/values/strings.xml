@@ -11,7 +11,6 @@
 
     <string name="nc__api_property_accept">application/json</string>
     <string name="nc__api_property_content_type">application/json</string>
-    <string name="nc__api_property_accept_encoding">gzip</string>
 
     <string name="nc__ssl_cert_keystore_password">some_password</string>
 

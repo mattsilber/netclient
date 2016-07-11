@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.8')
+        compile('com.guardanis:netclient:1.0.9')
     }
 ```
 
@@ -68,10 +68,24 @@ If you want to use a separate *ErrorParser*, you can either manually attach one 
 
 There are a few other things you can configure, including several request properties, but if you need more control you can just extend ApiRequest.
 
-### SSL Support
-If you would like to use an SSL connection for your WebRequests, as of version 1.0.8, you must either provide a BKS Keystore file and a password (default cert is configurable through resources by overriding *R.string.nc__ssl_cert_password* and the actual keystore file, *R.raw.nc__cert.bks*) to the WebRequest, or you must disable the SSL security measures by calling *setSslUnsafeModeEnabled(boolean unsafeSslModeEnabled)* to accept all certificates.
+##### Global API Request Properties
+Each WebRequest can have it's own individual header properties applied via addRequestProperty(String key, String value), or they can be applied globally via the GlobalApiRequestProperties singleton. e.g.
 
-Note: You shouldn't disable the certificates in production; it's strictly meant for development.
+    GlobalApiRequestProperties.getInstance(context)
+        .register("Some-Property", "some_value")
+        .register("Some-Other-Property", "some_other_value");
+
+##### Global API URL Parameters
+The GlobalApiUrlParams singleton can be used to append encoded properties to the end of each API URL automatically (i.e. ?key=value&other_key=other_value). Simply register the key/value pair and the ApiRequest will add them for you:
+
+    GlobalApiUrlParams.getInstance(context)
+        .register("some_key", "some_value")
+        .register("some_other_key", "some_other_value");
+
+### SSL Support
+If you would like to use an SSL connection for your WebRequests, as of version 1.0.8, you provide a BKS Keystore file and a password (default cert is configurable through resources by overriding *R.string.nc__ssl_cert_password* and the actual keystore file, *R.raw.nc__cert.bks*) to the WebRequest.
+
+Note: For testing purposes only, you may disable the SSL security measures by calling *setSslUnsafeModeEnabled(boolean unsafeSslModeEnabled)* to accept all host name verifiers. Do NOT put that in production.
 
 If you need help generating the required files, check the wiki.
 

@@ -37,11 +37,7 @@ public class InputStreamHelper {
     }
 
     public void closeConnection() {
-        try{
-            if(inputStream != null)
-                inputStream.close();
-        }
-        catch(Exception e){ }
+        NetUtils.close(inputStream);
     }
 
 }
