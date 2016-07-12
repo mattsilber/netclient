@@ -4,6 +4,8 @@
 
     <bool name="nc__api_basic_auth_enabled">false</bool>
 
+    <bool name="nc__custom_ssl_mode_enabled">false</bool>
+
     <bool name="nc__log_enabled">false</bool>
 
 </resources>

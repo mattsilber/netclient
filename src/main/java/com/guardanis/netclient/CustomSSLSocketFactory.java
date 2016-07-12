@@ -80,15 +80,22 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
                     if(tm instanceof X509TrustManager)
                         x509TrustManagers.add((X509TrustManager) tm);
 
-
             if(x509TrustManagers.size() == 0)
                 throw new CertificateException("Couldn't find any X509TrustManagers");
         }
 
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-            final X509TrustManager defaultX509TrustManager = x509TrustManagers.get(0);
-            defaultX509TrustManager.checkClientTrusted(chain, authType);
+            for(X509TrustManager tm : x509TrustManagers){
+                try{
+                    tm.checkClientTrusted(chain, authType);
+
+                    return;
+                }
+                catch(CertificateException e){ }
+            }
+
+            throw new CertificateException();
         }
 
         @Override
@@ -99,7 +106,7 @@ public class CustomSSLSocketFactory extends SSLSocketFactory {
 
                     return;
                 }
-                catch(CertificateException e ) {  }
+                catch(CertificateException e ){ }
             }
 
             throw new CertificateException();

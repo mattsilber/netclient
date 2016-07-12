@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.9')
+        compile('com.guardanis:netclient:1.0.10')
     }
 ```
 
@@ -83,9 +83,11 @@ The GlobalApiUrlParams singleton can be used to append encoded properties to the
         .register("some_other_key", "some_other_value");
 
 ### SSL Support
-If you would like to use an SSL connection for your WebRequests, as of version 1.0.8, you provide a BKS Keystore file and a password (default cert is configurable through resources by overriding *R.string.nc__ssl_cert_password* and the actual keystore file, *R.raw.nc__cert.bks*) to the WebRequest.
+If you would like to use custom SSL verification for your WebRequests, as of version 1.0.8, you can provide a BKS Keystore file and a password (default cert is configurable through resources by overriding *R.string.nc__ssl_cert_password* and the actual keystore file, *R.raw.nc__cert.bks*) to the WebRequest.
 
-Note: For testing purposes only, you may disable the SSL security measures by calling *setSslUnsafeModeEnabled(boolean unsafeSslModeEnabled)* to accept all host name verifiers. Do NOT put that in production.
+By default, using custom certificate verification is disabled and will default to using the system's. To enable the use of custom certificate verification, set *R.bool.nc__custom_ssl_mode_enabled* to true and supply your certification/password to the library.
+
+Note: For testing purposes only, you may disable the SSL security measures by calling *setSslUnsafeModeEnabled(boolean unsafeSslModeEnabled)* to accept all host name verifiers. Do NOT put that in production. Also, if custom SSL verification is disabled, this unsafe mode will have no effect.
 
 If you need help generating the required files, check the wiki.
 
@@ -129,5 +131,3 @@ It's absolutely possible to work with multiple API's, but it's not currently con
 
 You could then use SomeApiRequest the same way you would the normal ApiRequest.
 
-# Limitations, Known Issues, and ToDo's
-* Accept more than just a single BKS for SSLSocketFactory's TrustManager for HttpsUrlConnections

@@ -74,9 +74,11 @@ public class WebRequest<T> implements Runnable {
 
     protected ErrorParser errorParser;
 
+    protected boolean customSslModeEnabled = false;
+    protected boolean unsafeSslModeEnabled = false;
+
     protected int sslCertResource = R.raw.nc__cert;
     protected String sslCertPassword;
-    protected boolean unsafeSslModeEnabled = false;
 
     public WebRequest(Context context, ConnectionType connectionType){
         this(context, connectionType, "");
@@ -85,6 +87,7 @@ public class WebRequest<T> implements Runnable {
     public WebRequest(Context context, ConnectionType connectionType, String targetUrl){
         this.context = context;
         this.connectionType = connectionType;
+        this.customSslModeEnabled = context.getResources().getBoolean(R.bool.nc__custom_ssl_mode_enabled);
         this.sslCertPassword = context.getString(R.string.nc__ssl_cert_keystore_password);
 
         setTargetUrl(targetUrl);
@@ -141,9 +144,15 @@ public class WebRequest<T> implements Runnable {
         return this;
     }
 
+    public WebRequest<T> setCustomSslModeEnabled(boolean customSslModeEnabled){
+        this.customSslModeEnabled = customSslModeEnabled;
+        return this;
+    }
+
     public WebRequest<T> setSslCertificateInfo(int sslCertResource, String sslCertPassword){
         this.sslCertResource = sslCertResource;
         this.sslCertPassword = sslCertPassword;
+        this.customSslModeEnabled = true;
         return this;
     }
 
@@ -192,7 +201,7 @@ public class WebRequest<T> implements Runnable {
     protected HttpURLConnection openConnection() throws Exception {
         URL url = buildUrl();
 
-        if(targetUrl.startsWith("https://")){
+        if(customSslModeEnabled && targetUrl.startsWith("https://")){
             HttpURLConnection conn = (HttpsURLConnection) url.openConnection();
 
             CustomSSLSocketFactory factory = unsafeSslModeEnabled
