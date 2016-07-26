@@ -9,8 +9,7 @@ import java.util.ArrayList;
 public class RequestCanceledError extends RequestError {
 
     public RequestCanceledError(Context context) {
-        super(new ArrayList<String>());
-        errors.add(context.getString(R.string.nc__error_canceled));
+        super(context.getString(R.string.nc__error_canceled));
     }
 
 }

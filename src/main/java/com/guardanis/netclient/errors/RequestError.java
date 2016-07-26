@@ -7,6 +7,10 @@ public class RequestError {
 
     protected List<String> errors = new ArrayList<String>();
 
+    public RequestError(String error) {
+        this.errors.add(error);
+    }
+
     public RequestError(List<String> errors) {
         this.errors = errors;
     }

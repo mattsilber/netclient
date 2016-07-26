@@ -13,6 +13,7 @@ import com.guardanis.netclient.errors.ErrorParser;
 import com.guardanis.netclient.errors.GeneralError;
 import com.guardanis.netclient.errors.RequestCanceledError;
 import com.guardanis.netclient.errors.RequestError;
+import com.guardanis.netclient.errors.RequestTimeoutError;
 import com.guardanis.netclient.tools.InputStreamHelper;
 import com.guardanis.netclient.tools.NetUtils;
 import com.guardanis.netclient.tools.OutputStreamHelper;
@@ -69,6 +70,9 @@ public class WebRequest<T> implements Runnable {
 
     protected Looper originatingLooper;
 
+    protected boolean requestExecuted = false;
+    protected boolean responseReceived = false;
+
     protected boolean canceled = false;
     protected boolean failOnCancel = false;
 
@@ -80,6 +84,8 @@ public class WebRequest<T> implements Runnable {
     protected int sslCertResource = R.raw.nc__cert;
     protected String sslCertPassword;
 
+    protected long connectionTimeoutMs = 25000;
+
     public WebRequest(Context context, ConnectionType connectionType){
         this(context, connectionType, "");
     }
@@ -87,8 +93,14 @@ public class WebRequest<T> implements Runnable {
     public WebRequest(Context context, ConnectionType connectionType, String targetUrl){
         this.context = context;
         this.connectionType = connectionType;
-        this.customSslModeEnabled = context.getResources().getBoolean(R.bool.nc__custom_ssl_mode_enabled);
+
+        this.customSslModeEnabled = context.getResources()
+                .getBoolean(R.bool.nc__custom_ssl_mode_enabled);
+
         this.sslCertPassword = context.getString(R.string.nc__ssl_cert_keystore_password);
+
+        this.connectionTimeoutMs = context.getResources()
+                .getInteger(R.integer.nc__connection_timeout_seconds) * 1000l;
 
         setTargetUrl(targetUrl);
     }
@@ -164,7 +176,17 @@ public class WebRequest<T> implements Runnable {
         return this;
     }
 
+    public WebRequest<T> setConnectionTimeoutMs(long connectionTimeoutMs){
+        this.connectionTimeoutMs = connectionTimeoutMs;
+        return this;
+    }
+
     public WebRequest<T> execute(){
+        if(requestExecuted)
+            throw new RuntimeException("You should not execute a WebRequest that has already been run before!");
+
+        requestExecuted = true;
+
         this.originatingLooper = Looper.myLooper();
 
         EXECUTOR.execute(new Thread(this));
@@ -174,6 +196,8 @@ public class WebRequest<T> implements Runnable {
 
     @Override
     public void run(){
+        startTimeoutMonitoring();
+
         try{
             HttpURLConnection connection = openConnection();
 
@@ -184,6 +208,9 @@ public class WebRequest<T> implements Runnable {
             setRequestProperties(connection);
 
             WebResult result = makeRequest(connection, data);
+
+            responseReceived = true;
+
             onResponseReceived(result);
         }
         catch(final Throwable e){
@@ -290,6 +317,9 @@ public class WebRequest<T> implements Runnable {
         });
     }
 
+    /**
+     * If the WebRequest is not canceled, post the supplied Runnable back to the originating Thread
+     */
     protected void postToOriginalThread(Runnable runnable){
         try{
             if(canceled)
@@ -305,13 +335,31 @@ public class WebRequest<T> implements Runnable {
         this.canceled = true;
 
         if(failOnCancel){
-            new Handler(originatingLooper).post(new Runnable(){
-                public void run(){
-                    if(failListener != null)
-                        failListener.onFail(new RequestCanceledError(context));
-                }
-            });
+            new Handler(originatingLooper)
+                    .post(new Runnable(){
+                        public void run(){
+                            if(failListener != null)
+                                failListener.onFail(new RequestCanceledError(context));
+                        }
+                    });
         }
+    }
+
+    protected void startTimeoutMonitoring(){
+        if(connectionTimeoutMs < 1)
+            return;
+
+        new Handler(originatingLooper)
+                .postDelayed(new Runnable() {
+                    public void run() {
+                        if(!(responseReceived || canceled)){
+                            WebRequest.this.canceled = true;
+
+                            if(failListener != null)
+                                failListener.onFail(new RequestTimeoutError(context));
+                        }
+                    }
+                }, connectionTimeoutMs);
     }
 
 }

@@ -37,7 +37,9 @@ public class NetUtils {
     protected NetUtils(Context context){
         this.context = context.getApplicationContext();
         this.apiUrl = context.getString(R.string.nc__api_url);
-        this.loggingEnabled = context.getResources().getBoolean(R.bool.nc__log_enabled);
+
+        this.loggingEnabled = context.getResources()
+                .getBoolean(R.bool.nc__log_enabled);
 
         NetUtils.defaultApiErrorParser = new DefaultErrorParser(context.getApplicationContext());
     }

@@ -1,4 +1,5 @@
 <resources>
 
+    <integer name="nc__connection_timeout_seconds">25</integer>
 
 </resources>

@@ -30,7 +30,8 @@ public class GlobalApiRequestProperties {
         for(Map.Entry<String, ?> map : context.getSharedPreferences(PREFS, 0).getAll().entrySet()){
             try{
                 if(map.getKey().startsWith(PREF_KEY_PRE) && !String.valueOf(map.getValue()).equals(""))
-                    requestProperties.put(map.getKey().substring(PREF_KEY_PRE.length()), String.valueOf(map.getValue()));
+                    requestProperties.put(map.getKey().substring(PREF_KEY_PRE.length()),
+                            String.valueOf(map.getValue()));
             }
             catch(Exception e){ e.printStackTrace(); }
         }
