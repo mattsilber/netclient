@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.10')
+        compile('com.guardanis:netclient:1.0.11')
     }
 ```
 
