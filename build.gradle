@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 22
+        targetSdkVersion 23
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -63,7 +63,7 @@ ext {
     artifact = 'netclient'
 
     libraryDescription = 'A stupid-simple wrapper around HTTP/S-UrlConnection'
-    libraryVersion = '1.0.11'
+    libraryVersion = '1.0.12'
 
     developerId = 'mattsilber'
     developerName = 'Matt Silber'

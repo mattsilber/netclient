@@ -8,4 +8,6 @@
 
     <bool name="nc__log_enabled">false</bool>
 
+    <bool name="nc__default_on_error_parser_load_failure">true</bool>
+
 </resources>

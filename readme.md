@@ -1,7 +1,7 @@
 # netclient
+[![Download](https://api.bintray.com/packages/mattsilber/maven/netclient/images/download.svg) ](https://bintray.com/mattsilber/maven/netclient/_latestVersion)
 
 A stupid-simple wrapper around HTTP/S-UrlConnection.
-
 
 # Installation
 
@@ -11,20 +11,19 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.11')
+        compile('com.guardanis:netclient:1.0.12')
     }
 ```
 
-
 # Usage
 
-This library is meant to easily hook up to an API, parse that returned response, and pass off the successfully parsed data (or a ResponseError) to the calling Thread.
+This library is meant to easily hook up to an API, parse that returned response, and pass off the successfully parsed data (or a *RequestError*) to the calling Thread.
 
-The basic classes to work with are WebRequest and ApiRequest (an extension of the former). 
+The basic classes to work with are the general *WebRequest* and the more extendable *ApiRequest*. 
 
-When you execute the request, it will download the data in a separate thread, pass a WebResult wrapping the returned String data to the supplied ResponseParser, and return the result on the calling thread. 
+When you execute the request, it will download the data in a separate thread, pass a WebResult wrapping the returned String data / response code to the supplied ResponseParser, and return the result on the calling thread. 
 
-A RequestError will be returned if there was an issue connecting, parsing, or doing whatever. It's basically a wrapper around a list of error messages that can be nicely displayed to a user. A GeneralError will be returned in the event of an error is thrown and will contain whatever Throwable caused it. An ApiError is thrown when the ApiRequest's response contains error data instead of the desired data (see current limitations for the ErrorParser). 
+A RequestError will be returned if there was an issue connecting, parsing, or doing whatever. It's basically a wrapper around a list of error messages that can be nicely displayed to a user. A GeneralError will be returned in the event of an error is thrown and will contain whatever Throwable caused it. An ApiError is thrown when any WebRequest's response contains error data instead of the desired data (see current limitations for the ErrorParser). 
 
 ### Example
 
@@ -64,8 +63,6 @@ If you need an API-Version header, just set *R.bool.nc__api_version_header_enabl
 
 If you want to log requests and response data, set *R.bool.nc__log_enabled* to true.
 
-If you want to use a separate *ErrorParser*, you can either manually attach one via *setErrorParser(ErrorParser)* for specific requests, or set the default ErrorParser for ApiRequests via *NetUtils.setDefaultApiErrorParser(ErrorParser)*. If you're doing that, I'd recommend it be done in your Application's onCreate().
-
 There are a few other things you can configure, including several request properties, but if you need more control you can just extend ApiRequest.
 
 ##### Global API Request Properties
@@ -82,7 +79,16 @@ The GlobalApiUrlParams singleton can be used to append encoded properties to the
         .register("some_key", "some_value")
         .register("some_other_key", "some_other_value");
 
-### SSL Support
+##### Error Handling
+If you want to use a separate *ErrorParser*, you can either manually attach one via *WebRequest.setErrorParser(ErrorParser)* for specific requests, or set the default ErrorParser for both general WebRequests and ApiRequests via the methods below. If globally overriding, I'd recommend it be done in your Application's onCreate().
+
+    NetUtils.getInstance(context)
+        .setGeneralErrorParser(ErrorParser)
+        .setApiErrorParser(ErrorParser);
+
+Note on the ErrorParser implementations: they must have a default constructor as they are saved and loaded via reflection. You should also ensure your ErrorParser class names are excluded in your ProGuard rules, else it may fail to load them if you don't actively ensure they're set correctly.
+
+##### SSL Support
 If you would like to use custom SSL verification for your WebRequests, as of version 1.0.8, you can provide a BKS Keystore file and a password (default cert is configurable through resources by overriding *R.string.nc__ssl_cert_password* and the actual keystore file, *R.raw.nc__cert.bks*) to the WebRequest.
 
 By default, using custom certificate verification is disabled and will default to using the system's. To enable the use of custom certificate verification, set *R.bool.nc__custom_ssl_mode_enabled* to true and supply your certification/password to the library.
@@ -91,7 +97,7 @@ Note: For testing purposes only, you may disable the SSL security measures by ca
 
 If you need help generating the required files, check the wiki.
 
-### Multi-API Support
+##### Multi-API Support
 It's absolutely possible to work with multiple API's, but it's not currently configurable via overriding resources. If you want to implement the ApiRequest pattern for a secondary API, you can extends the ApiRequest class and override the configuration methods. The following template can help you do that pretty easily:
 
     public class SomeApiRequest<T> extends com.guardanis.netclient.ApiRequest<T> {
@@ -103,7 +109,7 @@ It's absolutely possible to work with multiple API's, but it's not currently con
         public SomeApiRequest(Context context, ConnectionType connectionType, String targetUrl) {
             super(context, connectionType, targetUrl);
 
-            setErrorParser(new DefaultErrorParser(context)); // Set your error parser     
+            setErrorParser(new DefaultErrorParser()); // Set your error parser     
             setSslCertificateInfo(R.raw.some_api_cert, context.getString(R.string.some_api_cert_password)); // Set the SSL cert info if you're using it   
         }
 
@@ -123,10 +129,6 @@ It's absolutely possible to work with multiple API's, but it's not currently con
                 conn.setRequestProperty(key, requestProperties.get(key));
         }
 
-        @Override
-        protected URL buildUrl() throws MalformedURLException {
-            return new URL(targetUrl);
-        }
     }
 
 You could then use SomeApiRequest the same way you would the normal ApiRequest.

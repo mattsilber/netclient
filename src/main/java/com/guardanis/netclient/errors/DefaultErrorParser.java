@@ -14,21 +14,15 @@ import java.util.List;
 
 public class DefaultErrorParser implements ErrorParser {
 
-    private Context context;
-
-    public DefaultErrorParser(Context context){
-        this.context = context;
-    }
-
     @Override
-    public List<String> parseErrorMessages(WebResult result) {
+    public List<String> parseErrorMessages(Context context, WebResult result) {
         List<String> errorMessages = new ArrayList<String>();
 
         try{
             JSONObject potentialErrors = result.getResponseJson();
 
             if(potentialErrors != null)
-                errorMessages = parseErrors(potentialErrors);
+                errorMessages = parseErrors(context, potentialErrors);
         }
         catch(Exception e){ e.printStackTrace(); }
 
@@ -38,7 +32,7 @@ public class DefaultErrorParser implements ErrorParser {
         return errorMessages;
     }
 
-    private List<String> parseErrors(JSONObject obj) {
+    private List<String> parseErrors(Context context, JSONObject obj) {
         List<String> errorMessages = new ArrayList<String>();
 
         if(obj.has("errors"))

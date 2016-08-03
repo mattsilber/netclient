@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -294,9 +295,22 @@ public class WebRequest<T> implements Runnable {
     }
 
     protected RequestError getErrorsFromResult(WebResult result){
-        return errorParser == null
+        ErrorParser activeParser = getErrorParser();
+
+        List<String> errors = activeParser == null
                 ? null
-                : new ApiError(result, errorParser);
+                : activeParser.parseErrorMessages(context, result);
+
+        return errors == null || errors.size() < 1
+                ? null
+                : new ApiError(result, errors);
+    }
+
+    protected ErrorParser getErrorParser(){
+        return errorParser == null
+                ? NetUtils.getInstance(context)
+                        .getGeneralErrorParser()
+                : errorParser;
     }
 
     protected void failWith(final RequestError errors){

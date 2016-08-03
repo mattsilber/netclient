@@ -2,8 +2,7 @@ package com.guardanis.netclient;
 
 import android.content.Context;
 
-import com.guardanis.netclient.errors.ApiError;
-import com.guardanis.netclient.errors.RequestError;
+import com.guardanis.netclient.errors.ErrorParser;
 import com.guardanis.netclient.tools.NetUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -42,11 +41,10 @@ public class ApiRequest<T> extends WebRequest<T> {
     }
 
     @Override
-    protected RequestError getErrorsFromResult(WebResult result){
-        if(errorParser == null)
-            return NetUtils.getDefaultApiErrorParser() == null
-                    ? null
-                    : new ApiError(result, NetUtils.getDefaultApiErrorParser());
-        else return super.getErrorsFromResult(result);
+    protected ErrorParser getErrorParser(){
+        return errorParser == null
+                ? NetUtils.getInstance(context)
+                        .getApiErrorParser()
+                : errorParser;
     }
 }

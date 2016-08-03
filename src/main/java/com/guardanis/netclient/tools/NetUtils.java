@@ -1,6 +1,7 @@
 package com.guardanis.netclient.tools;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.guardanis.netclient.R;
@@ -27,12 +28,17 @@ public class NetUtils {
 
     private static final String TAG = "netclient";
 
+    private static final String PREFS = "nc__netutils_preferences";
+    private static final String PREF__GENERAL_ERROR_PARSER_CLASS = "nc__general_error_parser";
+    private static final String PREF__API_ERROR_PARSER_CLASS = "nc__api_error_parser";
+
     private Context context;
     private String apiUrl;
 
     private boolean loggingEnabled;
 
-    private static ErrorParser defaultApiErrorParser;
+    private ErrorParser generalErrorParser;
+    private ErrorParser apiErrorParser;
 
     protected NetUtils(Context context){
         this.context = context.getApplicationContext();
@@ -41,15 +47,33 @@ public class NetUtils {
         this.loggingEnabled = context.getResources()
                 .getBoolean(R.bool.nc__log_enabled);
 
-        NetUtils.defaultApiErrorParser = new DefaultErrorParser(context.getApplicationContext());
+        this.generalErrorParser = loadErrorParserClass(PREF__GENERAL_ERROR_PARSER_CLASS);
+        this.apiErrorParser = loadErrorParserClass(PREF__API_ERROR_PARSER_CLASS);
+    }
+
+    private ErrorParser loadErrorParserClass(String key){
+        try{
+            return (ErrorParser) Class.forName(context.getSharedPreferences(PREFS, 0)
+                            .getString(key, DefaultErrorParser.class.getName()))
+                    .newInstance();
+        }
+        catch(Throwable e){
+            log(e.getMessage());
+
+            if(context.getResources().getBoolean(R.bool.nc__default_on_error_parser_load_failure))
+                return new DefaultErrorParser();
+
+            throw new RuntimeException(e);
+        }
     }
 
     public String getApiUrl(){
         return apiUrl;
     }
 
-    public void overrideApiUrl(String apiUrl){
+    public NetUtils overrideApiUrl(String apiUrl){
         this.apiUrl = apiUrl;
+        return this;
     }
 
     public void addBasicAuthRequestProperty(HttpURLConnection conn){
@@ -104,12 +128,54 @@ public class NetUtils {
                 context.getString(R.string.nc__api_encoding));
     }
 
-    public static void setDefaultApiErrorParser(ErrorParser parser){
-        NetUtils.defaultApiErrorParser = parser;
+    public NetUtils setGeneralErrorParser(Class parserClass){
+        try{
+            ErrorParser parser = (ErrorParser) Class.forName(parserClass.getName())
+                    .newInstance();
+
+            this.generalErrorParser = parser;
+        }
+        catch(Throwable e){
+            log(e.getMessage());
+
+            throw new RuntimeException(e);
+        }
+
+        context.getSharedPreferences(PREFS, 0)
+                .edit()
+                .putString(PREF__GENERAL_ERROR_PARSER_CLASS, parserClass.getName())
+                .commit();
+
+        return this;
     }
 
-    public static ErrorParser getDefaultApiErrorParser(){
-        return NetUtils.defaultApiErrorParser;
+    public ErrorParser getGeneralErrorParser(){
+        return generalErrorParser;
+    }
+
+    public NetUtils setApiErrorParser(Class parserClass){
+        try{
+            ErrorParser parser = (ErrorParser) Class.forName(parserClass.getName())
+                    .newInstance();
+
+            this.apiErrorParser = parser;
+        }
+        catch(Throwable e){
+            log(e.getMessage());
+
+            throw new RuntimeException(e);
+        }
+
+        context.getSharedPreferences(PREFS, 0)
+                .edit()
+                .putString(PREF__API_ERROR_PARSER_CLASS, parserClass.getName())
+                .commit();
+
+        return this;
+    }
+
+    public ErrorParser getApiErrorParser(){
+        return apiErrorParser;
     }
 
     public static void close(Closeable closeable){
