@@ -215,6 +215,8 @@ public class WebRequest<T> implements Runnable {
             onResponseReceived(result);
         }
         catch(final Throwable e){
+            responseReceived = true;
+
             postToOriginalThread(new Runnable() {
                 public void run() {
                     if(failListener != null)
