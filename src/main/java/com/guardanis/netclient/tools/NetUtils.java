@@ -1,7 +1,6 @@
 package com.guardanis.netclient.tools;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.guardanis.netclient.R;

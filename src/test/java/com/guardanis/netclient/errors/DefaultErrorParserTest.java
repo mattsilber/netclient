@@ -4,10 +4,7 @@ import android.content.Context;
 
 import com.guardanis.netclient.WebResult;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
-import static org.mockito.Mockito.*;
 
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

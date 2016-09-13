@@ -379,4 +379,8 @@ public class WebRequest<T> implements Runnable {
                 }, connectionTimeoutMs);
     }
 
+    public static Executor getRequestExecutor(){
+        return EXECUTOR;
+    }
+
 }

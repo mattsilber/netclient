@@ -6,8 +6,6 @@ import com.guardanis.netclient.tools.NetUtils;
 import com.guardanis.netclient.tools.RequestProperties;
 
 import java.net.HttpURLConnection;
-import java.util.HashMap;
-import java.util.Map;
 
 public class GlobalApiRequestProperties extends RequestProperties {
 
