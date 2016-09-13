@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.13')
+        compile('com.guardanis:netclient:1.0.14')
     }
 ```
 
@@ -72,12 +72,16 @@ Each WebRequest can have it's own individual header properties applied via addRe
         .register("Some-Property", "some_value")
         .register("Some-Other-Property", "some_other_value");
 
+As of v1.0.14, you can also use the `RequestParams` class for helping build URLs for non-ApiRequests.
+
 ##### Global API URL Parameters
 The GlobalApiUrlParams singleton can be used to append encoded properties to the end of each API URL automatically (i.e. ?key=value&other_key=other_value). Simply register the key/value pair and the ApiRequest will add them for you:
 
     GlobalApiUrlParams.getInstance(context)
         .register("some_key", "some_value")
         .register("some_other_key", "some_other_value");
+
+As of v1.0.14, you can also use the `UrlParams` class for helping build URLs for non-ApiRequests.
 
 ##### Error Handling
 If you want to use a separate *ErrorParser*, you can either manually attach one via *WebRequest.setErrorParser(ErrorParser)* for specific requests, or set the default ErrorParser for both general WebRequests and ApiRequests via the methods below. If globally overriding, I'd recommend it be done in your Application's onCreate().
