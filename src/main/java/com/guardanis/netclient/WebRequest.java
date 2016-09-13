@@ -212,7 +212,8 @@ public class WebRequest<T> implements Runnable {
 
             responseReceived = true;
 
-            onResponseReceived(result);
+            if(!canceled)
+                onResponseReceived(result);
         }
         catch(final Throwable e){
             responseReceived = true;
