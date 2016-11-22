@@ -69,9 +69,6 @@ public class CacheManager {
                     }
                 }
 
-                NetUtils.getInstance(context)
-                        .log("Got cache: " + result.getUnparsedResponse());
-
                 return result;
             }
         }
@@ -105,9 +102,6 @@ public class CacheManager {
             prefs.edit()
                     .putString(getCacheKey(cacheKey), encrypted)
                     .commit();
-
-            NetUtils.getInstance(context)
-                    .log("Cached: " + encrypted);
         }
         catch(Throwable e){
             NetUtils.getInstance(context)
