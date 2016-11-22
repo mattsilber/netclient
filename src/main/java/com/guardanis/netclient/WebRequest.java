@@ -14,6 +14,7 @@ import com.guardanis.netclient.errors.GeneralError;
 import com.guardanis.netclient.errors.RequestCanceledError;
 import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.errors.RequestTimeoutError;
+import com.guardanis.netclient.tools.CacheManager;
 import com.guardanis.netclient.tools.InputStreamHelper;
 import com.guardanis.netclient.tools.NetUtils;
 import com.guardanis.netclient.tools.OutputStreamHelper;
@@ -87,6 +88,9 @@ public class WebRequest<T> implements Runnable {
 
     protected long connectionTimeoutMs = 25000;
 
+    protected String cacheCypher;
+    protected long cacheDurationMs = 0;
+
     public WebRequest(Context context, ConnectionType connectionType){
         this(context, connectionType, "");
     }
@@ -99,6 +103,8 @@ public class WebRequest<T> implements Runnable {
                 .getBoolean(R.bool.nc__custom_ssl_mode_enabled);
 
         this.sslCertPassword = context.getString(R.string.nc__ssl_cert_keystore_password);
+
+        this.cacheCypher = context.getString(R.string.nc__cache_encryption_cypher);
 
         this.connectionTimeoutMs = context.getResources()
                 .getInteger(R.integer.nc__connection_timeout_seconds) * 1000l;
@@ -182,6 +188,24 @@ public class WebRequest<T> implements Runnable {
         return this;
     }
 
+    /**
+     * Override the default cypher for encrypting/decrypting cached data
+     * @param cacheCypher the cypher to decrypt cached data
+     */
+    public WebRequest<T> setCacheCypher(String cacheCypher) {
+        this.cacheCypher = cacheCypher;
+        return this;
+    }
+
+    /**
+     * Set the maximum length of time response data for this request can be cached for. Default is 0 (disabled)
+     * @param cacheDurationMs the maximum length cached data should be considered valid for in milliseconds
+     */
+    public WebRequest<T> setCacheDurationMs(long cacheDurationMs) {
+        this.cacheDurationMs = cacheDurationMs;
+        return this;
+    }
+
     public WebRequest<T> execute(){
         if(requestExecuted)
             throw new RuntimeException("You should not execute a WebRequest that has already been run before!");
@@ -200,20 +224,15 @@ public class WebRequest<T> implements Runnable {
         startTimeoutMonitoring();
 
         try{
-            HttpURLConnection connection = openConnection();
+            WebResult result = getCachedData();
 
-            if(connectionType == ConnectionType.POST)
-                connection.setDoOutput(true);
-
-            connection.setRequestMethod(connectionType.name());
-            setRequestProperties(connection);
-
-            WebResult result = makeRequest(connection, data);
+            if(result == null)
+                result = processNetworkRequest();
 
             responseReceived = true;
 
             if(!canceled)
-                onResponseReceived(result);
+                processResponse(result);
         }
         catch(final Throwable e){
             responseReceived = true;
@@ -227,6 +246,26 @@ public class WebRequest<T> implements Runnable {
 
             e.printStackTrace();
         }
+    }
+
+    protected WebResult getCachedData() throws Exception {
+        if(connectionType == ConnectionType.GET && 0 < cacheDurationMs)
+            return CacheManager.getInstance(context)
+                    .get(getCacheKey(), cacheCypher, cacheDurationMs);
+
+        return null;
+    }
+
+    protected WebResult processNetworkRequest() throws Exception {
+        HttpURLConnection connection = openConnection();
+
+        if(connectionType == ConnectionType.POST)
+            connection.setDoOutput(true);
+
+        connection.setRequestMethod(connectionType.name());
+        setRequestProperties(connection);
+
+        return makeRequest(connection, data);
     }
 
     protected HttpURLConnection openConnection() throws Exception {
@@ -289,12 +328,18 @@ public class WebRequest<T> implements Runnable {
         return new WebResult(conn.getResponseCode(), response);
     }
 
-    protected void onResponseReceived(WebResult result) throws Exception {
+    protected void processResponse(WebResult result) throws Exception {
         final RequestError errors = getErrorsFromResult(result);
 
         if(errors != null && errors.hasErrors())
             failWith(errors);
-        else finishWith(responseParser.parse(result));
+        else {
+            if(connectionType == ConnectionType.GET && 0 < cacheDurationMs)
+                CacheManager.getInstance(context)
+                        .cache(buildUrl().toString(), cacheCypher, result);
+
+            finishWith(responseParser.parse(result));
+        }
     }
 
     protected RequestError getErrorsFromResult(WebResult result){
@@ -314,6 +359,16 @@ public class WebRequest<T> implements Runnable {
                 ? NetUtils.getInstance(context)
                         .getGeneralErrorParser()
                 : errorParser;
+    }
+
+    protected String getCacheKey(){
+        try{
+            return buildUrl()
+                    .toString();
+        }
+        catch(Throwable e){
+            throw new RuntimeException("Unable to build cache key for URL from " + targetUrl);
+        }
     }
 
     protected void failWith(final RequestError errors){

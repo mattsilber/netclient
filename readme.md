@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.14')
+        compile('com.guardanis:netclient:1.0.15')
     }
 ```
 
@@ -136,4 +136,14 @@ It's absolutely possible to work with multiple API's, but it's not currently con
     }
 
 You could then use SomeApiRequest the same way you would the normal ApiRequest.
+
+##### Caching
+
+As of version 1.0.15, the result of a GET request can be cached at the WebRequest-level by calling `WebRequest.setCacheDurationMs(long)` with the maximum length of time a result's cache can be considered valid for in milliseconds.
+
+If you would like to globally override the cypher used for storing cached data, just set the value for `R.string.nc__cache_encryption_cypher*, or call `WebRequest.setCacheCypher(String)` on a per-request basis. If the cyphers from a previous cache don't match, the default behavior is to continue as if no data was available.
+
+The cache key is based on the final URL (with all query parameters appended), but does NOT take request properties into account.
+
+Note: if you're using the Map<String, Object> extras inside the WebResult for passing data, please ensure all Objects are serializable, or else it will fail to rebuild the extras and the caching will become inherently invalid.
 

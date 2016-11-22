@@ -3,14 +3,40 @@ package com.guardanis.netclient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class WebResult {
 
     private int responseCode;
     private String unparsedResponse;
 
+    private long createdAtMs = 0;
+
+    private Map<String, Object> extras = new HashMap<String, Object>();
+
     public WebResult(int responseCode, String unparsedResponse) {
+        this(responseCode, unparsedResponse, System.currentTimeMillis());
+    }
+
+    public WebResult(int responseCode, String unparsedResponse, long createdAtMs) {
         this.responseCode = responseCode;
         this.unparsedResponse = unparsedResponse;
+        this.createdAtMs = createdAtMs;
+    }
+
+    public Map<String, Object> getExtras() {
+        return extras;
+    }
+
+    public WebResult setExtras(Map<String, Object> extras) {
+        this.extras = extras;
+        return this;
+    }
+
+    public WebResult putExtra(String key, Object data){
+        this.extras.put(key, data);
+        return this;
     }
 
     public int getResponseCode() {
@@ -49,4 +75,7 @@ public class WebResult {
         return null;
     }
 
+    public long getCreatedAtMs() {
+        return createdAtMs;
+    }
 }
