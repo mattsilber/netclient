@@ -195,4 +195,8 @@ public class NetUtils {
             Log.d(TAG, message);
     }
 
+    public boolean isLoggingEnabled(){
+        return loggingEnabled;
+    }
+
 }

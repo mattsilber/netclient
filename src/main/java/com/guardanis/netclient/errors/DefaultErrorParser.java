@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.guardanis.netclient.R;
 import com.guardanis.netclient.WebResult;
+import com.guardanis.netclient.tools.NetUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,7 +25,10 @@ public class DefaultErrorParser implements ErrorParser {
             if(potentialErrors != null)
                 errorMessages = parseErrors(context, potentialErrors);
         }
-        catch(Exception e){ e.printStackTrace(); }
+        catch(Exception e){
+            if(NetUtils.getInstance(context).isLoggingEnabled())
+                e.printStackTrace();
+        }
 
         if(!result.isSuccessful() && errorMessages.size() < 1)
             errorMessages.add(context.getString(R.string.nc__error_unknown));
@@ -36,14 +40,16 @@ public class DefaultErrorParser implements ErrorParser {
         List<String> errorMessages = new ArrayList<String>();
 
         if(obj.has("errors"))
-            return parseErrorsList(obj.optJSONObject("errors"));
+            return parseErrorsList(context,
+                    obj.optJSONObject("errors"));
         else if(obj.has("error"))
-            errorMessages.add(obj.optString("error", context.getString(R.string.nc__error_unknown)));
+            errorMessages.add(obj.optString("error",
+                    context.getString(R.string.nc__error_unknown)));
 
         return errorMessages;
     }
 
-    protected List<String> parseErrorsList(JSONObject errors) {
+    protected List<String> parseErrorsList(Context context, JSONObject errors) {
         List<String> errorMessages = new ArrayList<String>();
 
         try{
@@ -54,7 +60,9 @@ public class DefaultErrorParser implements ErrorParser {
 
                 JSONArray messageArray = errors.optJSONArray(title);
                 for(int j = 0; j < messageArray.length(); j++){
-                    String message = (messageTitle.length() < 1 ? "" : (messageTitle + " ")) + messageArray.getString(j);
+                    String message = (messageTitle.length() < 1
+                            ? ""
+                            : (messageTitle + " ")) + messageArray.getString(j);
 
                     if(Character.isLetter(message.charAt(message.length() - 1)))
                         message += ".";
@@ -63,7 +71,10 @@ public class DefaultErrorParser implements ErrorParser {
                 }
             }
         }
-        catch(Exception e){ e.printStackTrace(); }
+        catch(Exception e){
+            if(NetUtils.getInstance(context).isLoggingEnabled())
+                e.printStackTrace();
+        }
 
         return errorMessages;
     }
