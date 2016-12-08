@@ -5,14 +5,14 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
 
 # Installation
 
-```
-    repositories {
-        jcenter()
-    }
+```groovy
+repositories {
+    jcenter()
+}
 
-    dependencies {
-        compile('com.guardanis:netclient:1.1.0')
-    }
+dependencies {
+    compile('com.guardanis:netclient:1.1.0')
+}
 ```
 
 # Usage
@@ -27,25 +27,30 @@ A RequestError will be returned if there was an issue connecting, parsing, or do
 
 ### Example
 
-    new ApiRequest<SomeObject>(context, ConnectionType.GET)
-        .setTargetUrl("some_endpoint/some_id")
-        .setResponseParser((webResult) -> new SomeObject(webResult.getResponseJson))
-        .onSuccess((result) -> doSomethingWithSomeObject(result))
-        .onFail((errors) -> Log.d(TAG, errors.toString())
-        .execute();
+```java
+new ApiRequest<SomeObject>(context, ConnectionType.GET)
+    .setTargetUrl("some_endpoint/some_id")
+    .setResponseParser((webResult) -> new SomeObject(webResult.getResponseJson))
+    .onSuccess((result) -> doSomethingWithSomeObject(result))
+    .onFail((errors) -> Log.d(TAG, errors.toString())
+    .execute();
+```
 
 And with a POST request...
-
-    new ApiRequest<SomeObject>(context, ConnectionType.POST)
-        .setTargetUrl("some_endpoint")
-        .setData(someObject.toJson())
+```java
+new ApiRequest<SomeObject>(context, ConnectionType.POST)
+    .setTargetUrl("some_endpoint")
+    .setData(someObject.toJson())
         ...
+```
 
 ### Configuration
 
 In order to use the ApiRequest, you need to override some String resources. Assuming you're using a JSON-based API, you only need to override
 
-    <string name="nc__api_url">http://some_url.com/api/v1/</string>
+```xml
+<string name="nc__api_url">http://some_url.com/api/v1/</string>
+```
 
 When making API Requests, you don't need to include the API Url as it is prepended for you.
 
@@ -53,13 +58,17 @@ When making API Requests, you don't need to include the API Url as it is prepend
 
 If you want to enable Basic Auth, just set *R.boolean.nc__api_basic_auth_enabled* to true, then override
 
-    <string name="nc__api_basic_auth_username">some_user</string>
-    <string name="nc__api_basic_auth_password">some_pass</string>
+```xml
+<string name="nc__api_basic_auth_username">some_user</string>
+<string name="nc__api_basic_auth_password">some_pass</string>
+```
 
 If you need an API-Version header, just set *R.bool.nc__api_version_header_enabled* to true, then override
 
-    <string name="nc__api_version_header_name">API-Version</string>
-    <string name="nc__api_version_header_value">420</string>
+```xml
+<string name="nc__api_version_header_name">API-Version</string>
+<string name="nc__api_version_header_value">420</string>
+```
 
 If you want to log requests and response data, set *R.bool.nc__log_enabled* to true.
 
@@ -68,27 +77,33 @@ There are a few other things you can configure, including several request proper
 ##### Global API Request Properties
 Each WebRequest can have it's own individual header properties applied via addRequestProperty(String key, String value), or they can be applied globally via the GlobalApiRequestProperties singleton. e.g.
 
-    GlobalApiRequestProperties.getInstance(context)
-        .register("Some-Property", "some_value")
-        .register("Some-Other-Property", "some_other_value");
+```java
+GlobalApiRequestProperties.getInstance(context)
+    .register("Some-Property", "some_value")
+    .register("Some-Other-Property", "some_other_value");
+```
 
 As of v1.0.14, you can also use the `RequestParams` class for helping build URLs for non-ApiRequests.
 
 ##### Global API URL Parameters
 The GlobalApiUrlParams singleton can be used to append encoded properties to the end of each API URL automatically (i.e. ?key=value&other_key=other_value). Simply register the key/value pair and the ApiRequest will add them for you:
 
-    GlobalApiUrlParams.getInstance(context)
-        .register("some_key", "some_value")
-        .register("some_other_key", "some_other_value");
+```java
+GlobalApiUrlParams.getInstance(context)
+    .register("some_key", "some_value")
+    .register("some_other_key", "some_other_value");
+```
 
 As of v1.0.14, you can also use the `UrlParams` class for helping build URLs for non-ApiRequests.
 
 ##### Error Handling
 If you want to use a separate *ErrorParser*, you can either manually attach one via *WebRequest.setErrorParser(ErrorParser)* for specific requests, or set the default ErrorParser for both general WebRequests and ApiRequests via the methods below. If globally overriding, I'd recommend it be done in your Application's onCreate().
 
-    NetUtils.getInstance(context)
-        .setGeneralErrorParser(ErrorParser)
-        .setApiErrorParser(ErrorParser);
+```java
+NetUtils.getInstance(context)
+    .setGeneralErrorParser(ErrorParser)
+    .setApiErrorParser(ErrorParser);
+```
 
 Note on the ErrorParser implementations: they must have a default constructor as they are saved and loaded via reflection. You should also ensure your ErrorParser class names are excluded in your ProGuard rules, else it may fail to load them if you don't actively ensure they're set correctly.
 
@@ -104,36 +119,37 @@ If you need help generating the required files, check the wiki.
 ##### Multi-API Support
 It's absolutely possible to work with multiple API's, but it's not currently configurable via overriding resources. If you want to implement the ApiRequest pattern for a secondary API, you can extends the ApiRequest class and override the configuration methods. The following template can help you do that pretty easily:
 
-    public class SomeApiRequest<T> extends com.guardanis.netclient.ApiRequest<T> {
+```java
+public class SomeApiRequest<T> extends com.guardanis.netclient.ApiRequest<T> {
 
-        public SomeApiRequest(Context context, ConnectionType connectionType) {
-            this(context, connectionType, "");
-        }
-
-        public SomeApiRequest(Context context, ConnectionType connectionType, String targetUrl) {
-            super(context, connectionType, targetUrl);
-
-            setErrorParser(new DefaultErrorParser()); // Set your error parser     
-            setSslCertificateInfo(R.raw.some_api_cert, context.getString(R.string.some_api_cert_password)); // Set the SSL cert info if you're using it   
-        }
-
-        @Override
-        public SomeApiRequest<T> setTargetUrl(String targetUrl){
-            this.targetUrl = "https://some_api.com/api/v1/" + targetUrl.trim();
-            return this;
-        }
-
-        @Override
-        protected void setRequestProperties(HttpURLConnection conn){
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Content-type", "application/json");
-            conn.setRequestProperty("Accept-Encoding", "gzip");
-
-            for(String key : requestProperties.keySet())
-                conn.setRequestProperty(key, requestProperties.get(key));
-        }
-
+    public SomeApiRequest(Context context, ConnectionType connectionType) {
+        this(context, connectionType, "");
     }
+
+    public SomeApiRequest(Context context, ConnectionType connectionType, String targetUrl) {
+        super(context, connectionType, targetUrl);
+
+        setErrorParser(new DefaultErrorParser()); // Set your error parser     
+        setSslCertificateInfo(R.raw.some_api_cert, context.getString(R.string.some_api_cert_password)); // Set the SSL cert info if you're using it   
+    }
+
+    @Override
+    public SomeApiRequest<T> setTargetUrl(String targetUrl){
+        this.targetUrl = "https://some_api.com/api/v1/" + targetUrl.trim();
+        return this;
+    }
+
+    @Override
+    protected void setRequestProperties(HttpURLConnection conn){
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setRequestProperty("Content-type", "application/json");
+        conn.setRequestProperty("Accept-Encoding", "gzip");
+
+        for(String key : requestProperties.keySet())
+            conn.setRequestProperty(key, requestProperties.get(key));
+    }
+}
+```
 
 You could then use SomeApiRequest the same way you would the normal ApiRequest.
 
