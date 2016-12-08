@@ -52,6 +52,21 @@ public class BatchRequest {
     }
 
     /**
+     * A helper method for adding a Batchable and a callback for its successful result.
+     * See: add(Batchable) and onItemSuccess(String, SuccessListener)
+     */
+    public BatchRequest applyFrom(BatchableManager batchableManager, long cacheDuration){
+        Batchable batchable = batchableManager.buildBatchable(context, cacheDuration);
+
+        this.add(batchable);
+
+        this.onItemSuccess(batchable.getKey(),
+                batchableManager.buildBatchableSuccessListener(context));
+
+        return this;
+    }
+
+    /**
      * Set a SuccessListener for the result of a BatchableItemResponse based on the Batchable's key. This response
      * will be triggered only after all requests have successfully completed, but immediately before the BatchSuccess
      * callback is triggered. NOTE: There is absolutely no compile-time type-safety using these callbacks, and it is
@@ -102,7 +117,7 @@ public class BatchRequest {
     }
 
     protected WebRequest<BatchItemResponse> buildBatchRequest(Batchable batchable){
-        if(Patterns.WEB_URL
+        if(!autoDelegateApiRequests || Patterns.WEB_URL
                 .matcher(batchable.getUrl())
                 .matches())
             return buildWebRequest(batchable);
