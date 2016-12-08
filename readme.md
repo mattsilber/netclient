@@ -11,7 +11,7 @@ A stupid-simple wrapper around HTTP/S-UrlConnection.
     }
 
     dependencies {
-        compile('com.guardanis:netclient:1.0.15')
+        compile('com.guardanis:netclient:1.1.0')
     }
 ```
 
@@ -146,4 +146,46 @@ If you would like to globally override the cypher used for storing cached data, 
 The cache key is based on the final URL (with all query parameters appended), but does NOT take request properties into account.
 
 Note: if you're using the Map<String, Object> extras inside the WebResult for passing data, please ensure all Objects are serializable, or else it will fail to rebuild the extras and the caching will become inherently invalid.
+
+##### Batching
+
+As of version 1.1.0, batching multiple GET requests into a single manager is now supported via the `BatchRequest` class. The BatchRequest is designed to be a simple way to manage multiple, asynchronous GET WebRequests and provide a single, consise interface for retrieving the data.
+
+The result of each `BatchItemResponse<T>` can be retrieved from the `BatchResult` by linking to the key of the `Batchable` you supplied when creating the BatchRequest. The BatchResult is returned to the callback supplied to `BatchRequest.onBatchSuccess(SuccessListener<BatchResult>)`, and all BatchItemResponses will be available there.
+
+If any of the Batchables fail, the callback supplied to `BatchRequest.onBatchFail(RequestError)` will be triggered once with errors consolidated from each failed request.
+
+You also have the option to supply a `SuccessListener<T>` for each item to be triggered right before the BatchResult is returned. Each key can have any number of callbacks associated with it, and can be set via `BatchRequest.onItemSuccess(SuccessListener<T>)`. But, please note: There is absolutely no type-safety using these callbacks. It's up to you, as the developer, to ensure the keys you supply map to the correct data type; else you may run into `ClassCastExceptions` when the BatchRequest attempts to post the data via the callback.
+
+Here's an example of a BatchRequest for 3 different URLS, with different cache values for each:
+
+```java
+new BatchRequest(this)
+    .add(new Batchable("posts")
+        .setUrl("https://jsonplaceholder.typicode.com/posts/1")
+        .setMaxCacheDuration(TimeUnit.MINUTES.toMillis(10))
+        .setResponseParser(result -> result))
+    .add(new Batchable("comments")
+        .setUrl("https://jsonplaceholder.typicode.com/posts/1/comments")
+        .setMaxCacheDuration(TimeUnit.MINUTES.toMillis(1))
+        .setResponseParser(result -> result))
+    .add(new Batchable("albums")
+        .setUrl("https://jsonplaceholder.typicode.com/albums")
+        .setMaxCacheDuration(TimeUnit.MINUTES.toMillis(0))
+        .setResponseParser(result -> result))
+    .onItemSuccess("posts", ((NetInterface.SuccessListener<WebResult>)(response) -> 
+        Log.d("NetClient", "individual (posts) #1: " + response.getUnparsedResponse())))
+    .onItemSuccess("posts", ((NetInterface.SuccessListener<WebResult>)(response) -> 
+        Log.d("NetClient", "individual (posts) #2: " + response.getUnparsedResponse())))
+    .onBatchSuccess(batchResult -> {
+        Log.d("NetClient", "batched (posts): " + batchResult.get("posts").getResult().getUnparsedResponse());
+        Log.d("NetClient", "batched (comments): " + batchResult.get("comments").getResult().getUnparsedResponse());
+        Log.d("NetClient", "batched (albums): " + batchResult.get("albums").getResult().getUnparsedResponse());
+    })
+    .onBatchFail(errors -> 
+        new AlertDialog.Builder(this)
+            .setMessage(errors.toString())
+            .show())
+    .execute();
+```
 
