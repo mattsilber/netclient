@@ -11,6 +11,7 @@ import com.guardanis.netclient.R;
 import com.guardanis.netclient.WebRequest;
 import com.guardanis.netclient.WebResult;
 import com.guardanis.netclient.errors.RequestError;
+import com.guardanis.netclient.tools.NetUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,7 +29,7 @@ public class BatchRequest {
     protected List<Batchable> batchableItems = new ArrayList<Batchable>();
 
     protected SuccessListener<BatchResponse> batchSuccessListener;
-    protected Map<String, List<SuccessListener>> itemSuccessListeners = new LinkedHashMap<String, List<SuccessListener>>();
+    protected List<Respondable> itemSuccessListeners = new ArrayList<Respondable>();
 
     protected FailListener failListener;
 
@@ -73,11 +74,17 @@ public class BatchRequest {
      * entirely up to you to ensure your key maps to the correct response value, else you may get ClassCastExceptions
      */
     public <T> BatchRequest onItemSuccess(String key, SuccessListener<T> successListener) {
-        if(itemSuccessListeners.get(key) == null)
-            itemSuccessListeners.put(key, new ArrayList<SuccessListener>());
+        return onItemSuccess(new Respondable(key, successListener));
+    }
 
-        itemSuccessListeners.get(key)
-                .add(successListener);
+    /**
+     * Set a SuccessListener for the result of a BatchableItemResponse based on the Batchable's key. This response
+     * will be triggered only after all requests have successfully completed, but immediately before the BatchSuccess
+     * callback is triggered. NOTE: There is absolutely no compile-time type-safety using these callbacks, and it is
+     * entirely up to you to ensure your key maps to the correct response value, else you may get ClassCastExceptions
+     */
+    public <T> BatchRequest onItemSuccess(Respondable<T> respondable) {
+        itemSuccessListeners.add(respondable);
 
         return this;
     }
@@ -188,13 +195,23 @@ public class BatchRequest {
         new Handler(Looper.getMainLooper())
                 .post(new Runnable() {
                     public void run() {
-                        for(String key : itemSuccessListeners.keySet())
-                            for(SuccessListener listener : itemSuccessListeners.get(key))
-                                listener.onSuccess(response.get(key)
-                                        .getData());
+                        try{
+                            for(Respondable respondable : itemSuccessListeners)
+                                respondable.getSuccessListener()
+                                        .onSuccess(response.get(respondable.getKey())
+                                                .getData());
 
-                        if(batchSuccessListener != null)
-                            batchSuccessListener.onSuccess(response);
+                            if(batchSuccessListener != null)
+                                batchSuccessListener.onSuccess(response);
+                        }
+                        catch(Throwable e){
+                            if(NetUtils.getInstance(context)
+                                    .isLoggingEnabled())
+                                e.printStackTrace();
+
+                            if(!canceled)
+                                safelyPostFailure(new RequestError(e.getMessage()));
+                        }
                     }
                 });
     }
@@ -279,4 +296,23 @@ public class BatchRequest {
         this.autoDelegateApiRequests = autoDelegateApiRequests;
         return this;
     }
+
+    public static class Respondable<T> {
+        private String key;
+        private SuccessListener<T> successListener;
+
+        public Respondable(String key, SuccessListener<T> successListener){
+            this.key = key;
+            this.successListener = successListener;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public SuccessListener<T> getSuccessListener() {
+            return successListener;
+        }
+    }
+
 }

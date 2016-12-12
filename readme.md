@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:netclient:1.1.1')
+    compile('com.guardanis:netclient:1.1.2')
 }
 ```
 
@@ -171,7 +171,7 @@ The result of each `BatchItemResponse<T>` can be retrieved from the `BatchResult
 
 If any of the Batchables fail, the callback supplied to `BatchRequest.onBatchFail(RequestError)` will be triggered once with errors consolidated from each failed request.
 
-You also have the option to supply a `SuccessListener<T>` for each item to be triggered right before the BatchResult is returned. Each key can have any number of callbacks associated with it, and can be set via `BatchRequest.onItemSuccess(SuccessListener<T>)`. But, please note: There is absolutely no type-safety using these callbacks. It's up to you, as the developer, to ensure the keys you supply map to the correct data type; else you may run into `ClassCastExceptions` when the BatchRequest attempts to post the data via the callback.
+You also have the option to supply a `SuccessListener<T>` for each item to be triggered right before the BatchResult is returned. Each key can have any number of callbacks associated with it, and can be set via `BatchRequest.onItemSuccess(String, SuccessListener<T>)` or `BatchRequest.onItemSuccess(Respondable<T>)`. But, please note: There is absolutely no type-safety using these callbacks. It's up to you, as the developer, to ensure the keys you supply map to the correct data type. If the types don't match up, or any other kind of exception is thrown during any of the callbacks or parsers, the `onFail(RequestError)` method will be triggered with the messages of the Throwable. 
 
 Here's an example of a BatchRequest for 3 different URLS, with different cache values for each:
 
@@ -191,6 +191,8 @@ new BatchRequest(this)
         .setResponseParser(result -> result))
     .onItemSuccess("posts", ((NetInterface.SuccessListener<WebResult>)(response) -> 
         Log.d("NetClient", "individual (posts) #1: " + response.getUnparsedResponse())))
+    .onItemSuccess("comments", ((NetInterface.SuccessListener<WebResult>)(response) -> 
+        Log.d("NetClient", "individual (comments) #1: " + response.getUnparsedResponse())))
     .onItemSuccess("posts", ((NetInterface.SuccessListener<WebResult>)(response) -> 
         Log.d("NetClient", "individual (posts) #2: " + response.getUnparsedResponse())))
     .onBatchSuccess(batchResult -> {
