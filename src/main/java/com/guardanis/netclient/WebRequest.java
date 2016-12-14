@@ -198,7 +198,8 @@ public class WebRequest<T> implements Runnable {
     }
 
     /**
-     * Set the maximum length of time response data for this request can be cached for. Default is 0 (disabled)
+     * Set the maximum length of time that response data for this request can be cached for. Default is 0 (disabled).
+     * If you want the result to be cached, but not use the cache for this specific request, just set this value to 1.
      * @param cacheDurationMs the maximum length cached data should be considered valid for in milliseconds
      */
     public WebRequest<T> setCacheDurationMs(long cacheDurationMs) {
@@ -270,6 +271,9 @@ public class WebRequest<T> implements Runnable {
 
     protected HttpURLConnection openConnection() throws Exception {
         URL url = buildUrl();
+
+        NetUtils.getInstance(context)
+                .log("Requesting: " + url);
 
         if(customSslModeEnabled && targetUrl.startsWith("https://")){
             HttpURLConnection conn = (HttpsURLConnection) url.openConnection();

@@ -2,10 +2,7 @@ package com.guardanis.netclient;
 
 import android.content.Context;
 
-import com.guardanis.netclient.tools.NetUtils;
 import com.guardanis.netclient.tools.UrlParams;
-
-import java.io.UnsupportedEncodingException;
 
 public class GlobalApiUrlParams extends UrlParams {
 
@@ -24,13 +21,4 @@ public class GlobalApiUrlParams extends UrlParams {
         super(context, PREFS, PREF_KEY_PRE);
     }
 
-    @Override
-    public String addAdditions(String url) throws UnsupportedEncodingException {
-        url = super.addAdditions(url);
-
-        NetUtils.getInstance(context)
-                .log("URL (with additions): " + url);
-
-        return url;
-    }
 }
