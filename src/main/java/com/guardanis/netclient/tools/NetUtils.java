@@ -13,11 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.URLEncoder;
 import java.util.Map;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
-
 import it.sauronsoftware.base64.Base64;
 
 public class NetUtils {

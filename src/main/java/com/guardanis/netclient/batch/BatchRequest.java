@@ -6,7 +6,9 @@ import android.os.Looper;
 import android.util.Patterns;
 
 import com.guardanis.netclient.ApiRequest;
-import com.guardanis.netclient.NetInterface.*;
+import com.guardanis.netclient.NetInterface.FailListener;
+import com.guardanis.netclient.NetInterface.ResponseParser;
+import com.guardanis.netclient.NetInterface.SuccessListener;
 import com.guardanis.netclient.R;
 import com.guardanis.netclient.WebRequest;
 import com.guardanis.netclient.WebResult;
@@ -14,7 +16,6 @@ import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.tools.NetUtils;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;

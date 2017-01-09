@@ -1,8 +1,6 @@
 package com.guardanis.netclient.batch;
 
 import com.guardanis.netclient.NetInterface;
-import com.guardanis.netclient.tools.RequestProperties;
-import com.guardanis.netclient.tools.UrlParams;
 
 import java.util.HashMap;
 import java.util.Map;

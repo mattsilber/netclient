@@ -32,7 +32,6 @@ public class RequestError {
         else
             errors.add(context.getResources()
                     .getString(R.string.nc__error_unknown));
-
     }
 
     public RequestError(String error) {
