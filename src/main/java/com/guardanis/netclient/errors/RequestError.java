@@ -25,13 +25,17 @@ public class RequestError {
 
     @Override
     public String toString() {
-        String errorMessage = "";
+        return toString("\n");
+    }
 
-        for(String s : errors)
-            errorMessage += s + "\n";
+    public String toString(String delimiter){
+        if(errors == null || errors.size() < 1)
+            return "Something went wrong.";
 
-        if(errorMessage.length() > 3)
-            errorMessage = errorMessage.substring(0, errorMessage.length() - 1);
+        String errorMessage = errors.get(0);
+
+        for(int i = 1; i < errors.size(); i++)
+            errorMessage += delimiter + errors.get(i);
 
         return errorMessage;
     }
