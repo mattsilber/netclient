@@ -10,7 +10,6 @@ import com.guardanis.netclient.NetInterface.ResponseParser;
 import com.guardanis.netclient.NetInterface.SuccessListener;
 import com.guardanis.netclient.errors.ApiError;
 import com.guardanis.netclient.errors.ErrorParser;
-import com.guardanis.netclient.errors.GeneralError;
 import com.guardanis.netclient.errors.RequestCanceledError;
 import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.errors.RequestTimeoutError;
@@ -241,7 +240,7 @@ public class WebRequest<T> implements Runnable {
             postToOriginalThread(new Runnable() {
                 public void run() {
                     if(failListener != null)
-                        failListener.onFail(new GeneralError(context, e));
+                        failListener.onFail(new RequestError(context, e));
                 }
             });
 

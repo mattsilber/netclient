@@ -10,6 +10,7 @@ public class ApiError extends RequestError {
 
     public ApiError(WebResult result, List<String> errors){
         super(errors);
+
         this.result = result;
     }
 
