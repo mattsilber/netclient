@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:netclient:1.1.3')
+    compile('com.guardanis:netclient:1.2.0')
 }
 ```
 
@@ -97,7 +97,12 @@ GlobalApiUrlParams.getInstance(context)
 As of v1.0.14, you can also use the `UrlParams` class for helping build URLs for non-ApiRequests.
 
 ##### Error Handling
-If you want to use a separate *ErrorParser*, you can either manually attach one via *WebRequest.setErrorParser(ErrorParser)* for specific requests, or set the default ErrorParser for both general WebRequests and ApiRequests via the methods below. If globally overriding, I'd recommend it be done in your Application's onCreate().
+
+If at any time the WebRequest runs into an error, or its supplied `ErrorParser` returns a non-empty list of error messages, the requests `onFail(RequestError)` method will be called with as much information as can be provided. If a `WebResult` is available, it can be accessed via `RequestError.getResponse()`. Same goes for the Throwable cause, which could be accessed via `RequestError.getThrowable()`. Both of these may be null.
+
+###### Custom ErrorParser
+
+With many different APIs, there are also many different forms of error messages a server may return. If you want to use a separate *ErrorParser* to handle a case not already covered by the DefaultErrorParser, you can either manually attach one via *WebRequest.setErrorParser(ErrorParser)* for specific requests, or set the default ErrorParser for both general WebRequests and ApiRequests via the methods below. If globally overriding, I'd recommend it be done in your Application's onCreate().
 
 ```java
 NetUtils.getInstance(context)
@@ -151,7 +156,7 @@ public class SomeApiRequest<T> extends com.guardanis.netclient.ApiRequest<T> {
 }
 ```
 
-You could then use SomeApiRequest the same way you would the normal ApiRequest.
+You could then use `SomeApiRequest` the same way you would the normal ApiRequest.
 
 ##### Caching
 
@@ -169,7 +174,7 @@ As of version 1.1.0, batching multiple GET requests into a single manager is now
 
 The result of each `BatchItemResponse<T>` can be retrieved from the `BatchResult` by linking to the key of the `Batchable` you supplied when creating the BatchRequest. The BatchResult is returned to the callback supplied to `BatchRequest.onBatchSuccess(SuccessListener<BatchResult>)`, and all BatchItemResponses will be available there.
 
-If any of the Batchables fail, the callback supplied to `BatchRequest.onBatchFail(RequestError)` will be triggered once with errors consolidated from each failed request.
+If any of the Batchables fail, the callback supplied to `BatchRequest.onBatchFail(RequestError)` will be triggered with a `BatchError` containing the standard collection of error messages, as well as access to each individual `BatchItemResponse` and their potential results or errors.
 
 You also have the option to supply a `SuccessListener<T>` for each item to be triggered right before the BatchResult is returned. Each key can have any number of callbacks associated with it, and can be set via `BatchRequest.onItemSuccess(String, SuccessListener<T>)` or `BatchRequest.onItemSuccess(Respondable<T>)`. But, please note: There is absolutely no type-safety using these callbacks. It's up to you, as the developer, to ensure the keys you supply map to the correct data type. If the types don't match up, or any other kind of exception is thrown during any of the callbacks or parsers, the `onFail(RequestError)` method will be triggered with the messages of the Throwable. 
 

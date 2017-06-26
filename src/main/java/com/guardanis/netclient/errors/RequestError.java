@@ -24,6 +24,11 @@ public class RequestError {
     protected boolean connectionIssue = false;
 
     public RequestError(Context context, Throwable throwable) {
+        this(context, null, throwable);
+    }
+
+    public RequestError(Context context, WebResult response, Throwable throwable) {
+        this.response = response;
         this.throwable = throwable;
 
         if(throwable == null)

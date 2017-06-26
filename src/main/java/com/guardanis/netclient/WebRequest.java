@@ -222,8 +222,10 @@ public class WebRequest<T> implements Runnable {
     public void run(){
         startTimeoutMonitoring();
 
+        WebResult result = null;
+
         try{
-            WebResult result = getCachedData();
+            result = getCachedData();
 
             if(result == null)
                 result = processNetworkRequest();
@@ -236,10 +238,12 @@ public class WebRequest<T> implements Runnable {
         catch(final Throwable e){
             responseReceived = true;
 
+            final WebResult r = result;
+
             postToOriginalThread(new Runnable() {
                 public void run() {
                     if(failListener != null)
-                        failListener.onFail(new RequestError(context, e));
+                        failListener.onFail(new RequestError(context, r, e));
                 }
             });
 
