@@ -25,7 +25,7 @@ public class DefaultErrorParserTest {
         List<String> errorMessages = new DefaultErrorParser()
                 .parseErrorMessages(mockedContext, result);
 
-        ApiError errors = new ApiError(result, errorMessages);
+        RequestError errors = new RequestError(result, errorMessages);
 
         assert(errors.hasErrors());
         assert(errors.getErrors().get(0).equals("Some base error occurred."));
@@ -38,7 +38,7 @@ public class DefaultErrorParserTest {
         List<String> errorMessages = new DefaultErrorParser()
                 .parseErrorMessages(mockedContext, result);
 
-        ApiError errors = new ApiError(result, errorMessages);
+        RequestError errors = new RequestError(result, errorMessages);
 
         assert(errors.hasErrors());
         assert(errors.getErrors().get(0).equals("Key has some issue."));
@@ -51,7 +51,7 @@ public class DefaultErrorParserTest {
         List<String> errorMessages = new DefaultErrorParser()
                 .parseErrorMessages(mockedContext, result);
 
-        ApiError errors = new ApiError(result, errorMessages);
+        RequestError errors = new RequestError(result, errorMessages);
 
         assert(errors.hasErrors());
         assert(errors.toString().equals("Key has some issue.\nKey has some other issue."));

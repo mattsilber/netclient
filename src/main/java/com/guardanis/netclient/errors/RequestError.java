@@ -3,6 +3,7 @@ package com.guardanis.netclient.errors;
 import android.content.Context;
 
 import com.guardanis.netclient.R;
+import com.guardanis.netclient.WebResult;
 
 import java.io.InterruptedIOException;
 import java.net.SocketException;
@@ -17,10 +18,12 @@ public class RequestError {
 
     protected List<String> errors = new ArrayList<String>();
 
-    private Throwable throwable;
-    private boolean connectionIssue = false;
+    protected WebResult response;
 
-    public RequestError(Context context, Throwable throwable){
+    protected Throwable throwable;
+    protected boolean connectionIssue = false;
+
+    public RequestError(Context context, Throwable throwable) {
         this.throwable = throwable;
 
         if(isLikelyConnectionError(throwable)){
@@ -39,6 +42,11 @@ public class RequestError {
     }
 
     public RequestError(List<String> errors) {
+        this.errors = errors;
+    }
+
+    public RequestError(WebResult response, List<String> errors) {
+        this.response = response;
         this.errors = errors;
     }
 
@@ -76,12 +84,22 @@ public class RequestError {
                         || throwable instanceof SSLException);
     }
 
-    public boolean isKnownConnectionIssue(){
+    public boolean isKnownConnectionIssue() {
         return connectionIssue;
     }
 
+    /**
+     * @return The Throwable reason the request failed, or null if there is none
+     */
     public Throwable getThrowable() {
         return throwable;
+    }
+
+    /**
+     * @return the WebResult response, or null if there is none
+     */
+    public WebResult getResponse() {
+        return response;
     }
 
 }

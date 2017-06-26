@@ -8,7 +8,6 @@ import com.guardanis.netclient.NetInterface.FailListener;
 import com.guardanis.netclient.NetInterface.Jsonable;
 import com.guardanis.netclient.NetInterface.ResponseParser;
 import com.guardanis.netclient.NetInterface.SuccessListener;
-import com.guardanis.netclient.errors.ApiError;
 import com.guardanis.netclient.errors.ErrorParser;
 import com.guardanis.netclient.errors.RequestCanceledError;
 import com.guardanis.netclient.errors.RequestError;
@@ -354,7 +353,7 @@ public class WebRequest<T> implements Runnable {
 
         return errors == null || errors.size() < 1
                 ? null
-                : new ApiError(result, errors);
+                : new RequestError(result, errors);
     }
 
     protected ErrorParser getErrorParser(){
