@@ -7,8 +7,8 @@ public class BatchItemResponse<T> {
 
     private Batchable<T> batchable;
 
-    private WebResult result;
-    private T data;
+    private WebResult response;
+    private T result;
 
     private RequestError error;
 
@@ -16,9 +16,14 @@ public class BatchItemResponse<T> {
         this.batchable = batchable;
     }
 
-    public BatchItemResponse<T> setResult(WebResult result, T data) {
+    public BatchItemResponse<T> setResponse(WebResult response) {
+        this.response = response;
+
+        return this;
+    }
+
+    public BatchItemResponse<T> setResult(T result) {
         this.result = result;
-        this.data = data;
         return this;
     }
 
@@ -31,12 +36,17 @@ public class BatchItemResponse<T> {
         return batchable;
     }
 
-    public WebResult getResult() {
-        return result;
+    public WebResult getResponse() {
+        return response;
     }
 
+    @Deprecated
     public T getData() {
-        return data;
+        return getResult();
+    }
+
+    public T getResult() {
+        return result;
     }
 
     public RequestError getError() {

@@ -246,10 +246,11 @@ public class BatchRequest {
         }
 
         @Override
-        public BatchItemResponse parse(WebResult result) throws Exception {
+        public BatchItemResponse parse(WebResult response) throws Exception {
             return new BatchItemResponse(batchable)
-                    .setResult(result, batchable.getResponseParser()
-                            .parse(result));
+                    .setResponse(response)
+                    .setResult(batchable.getResponseParser()
+                            .parse(response));
         }
     }
 
@@ -279,6 +280,7 @@ public class BatchRequest {
         public void onFail(RequestError error) {
             responses.put(batchable.getKey(),
                     new BatchItemResponse(batchable)
+                            .setResponse(error.getResponse())
                             .setError(error));
 
             onDataReceived();

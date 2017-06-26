@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:netclient:1.2.0')
+    compile('com.guardanis:netclient:1.2.1')
 }
 ```
 
