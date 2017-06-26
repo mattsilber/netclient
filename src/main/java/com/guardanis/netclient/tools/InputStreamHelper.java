@@ -22,6 +22,10 @@ public class InputStreamHelper {
             inputStream = new GZIPInputStream(inputStream);
     }
 
+    public InputStreamHelper(InputStream inputStream){
+        this.inputStream = inputStream;
+    }
+
     public String read() throws IOException {
         String response = "";
         String line;
