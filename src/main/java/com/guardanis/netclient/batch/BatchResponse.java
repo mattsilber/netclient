@@ -2,11 +2,18 @@ package com.guardanis.netclient.batch;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BatchResponse {
 
     private Map<String, BatchItemResponse> itemsMap = new HashMap<String, BatchItemResponse>();
+
+    public BatchResponse() { }
+
+    public BatchResponse(Map<String, BatchItemResponse> responses) {
+        this.itemsMap = responses;
+    }
 
     public BatchResponse put(BatchItemResponse response){
         itemsMap.put(response.getBatchable().getKey(), response);

@@ -26,15 +26,17 @@ public class RequestError {
     public RequestError(Context context, Throwable throwable) {
         this.throwable = throwable;
 
-        if(isLikelyConnectionError(throwable)){
+        if(throwable == null)
+            errors.add(context.getResources()
+                    .getString(R.string.nc__error_unknown));
+        else if(isLikelyConnectionError(throwable)){
             this.connectionIssue = true;
 
             errors.add(context.getResources()
                     .getString(R.string.nc__error_connection));
         }
         else
-            errors.add(context.getResources()
-                    .getString(R.string.nc__error_unknown));
+            errors.add(throwable.getMessage());
     }
 
     public RequestError(String error) {

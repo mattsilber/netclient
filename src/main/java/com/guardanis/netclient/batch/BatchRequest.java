@@ -16,6 +16,7 @@ import com.guardanis.netclient.errors.RequestError;
 import com.guardanis.netclient.tools.NetUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,7 +40,7 @@ public class BatchRequest {
     protected boolean failOnCancel = true;
     protected boolean postedFailures = false;
 
-    protected List<BatchItemResponse> responses = new ArrayList<BatchItemResponse>();
+    protected Map<String, BatchItemResponse> responses = new HashMap<String, BatchItemResponse>();
 
     protected boolean autoDelegateApiRequests = true;
 
@@ -109,6 +110,9 @@ public class BatchRequest {
         return this;
     }
 
+    /**
+     * Execute the supplied Batchables. Throws a RuntimeException if there are no Batchables or if this BatchRequest instance has ever been started.
+     */
     public BatchRequest execute(){
         if(requests != null || postedFailures)
             throw new RuntimeException("You cannot restart a BatchRequest!");
@@ -168,25 +172,16 @@ public class BatchRequest {
     }
 
     protected void processResponses(){
-        final List<String> errors = new ArrayList<String>();
+        for(BatchItemResponse response : responses.values()) {
+            if(response.hasErrors()) {
+                if(!canceled || failOnCancel)
+                    safelyPostFailure(new BatchError(responses));
 
-        for(BatchItemResponse response : responses)
-            if(response.hasErrors())
-                errors.addAll(response.getError().getErrors());
-
-        if(0 < errors.size()){
-            if(!canceled || failOnCancel)
-                safelyPostFailure(new RequestError(errors));
-
-            return;
+                return;
+            }
         }
 
-        BatchResponse response = new BatchResponse();
-
-        for(BatchItemResponse item : responses)
-            response.put(item);
-
-            postSuccessfulData(response);
+        postSuccessfulData(new BatchResponse(responses));
     }
 
     protected void postSuccessfulData(final BatchResponse response){
@@ -267,7 +262,7 @@ public class BatchRequest {
 
         @Override
         public void onSuccess(BatchItemResponse result) {
-            responses.add(result);
+            responses.put(batchable.getKey(), result);
 
             onDataReceived();
         }
@@ -282,8 +277,9 @@ public class BatchRequest {
 
         @Override
         public void onFail(RequestError error) {
-            responses.add(new BatchItemResponse(batchable)
-                    .setError(error));
+            responses.put(batchable.getKey(),
+                    new BatchItemResponse(batchable)
+                            .setError(error));
 
             onDataReceived();
         }
