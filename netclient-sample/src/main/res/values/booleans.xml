@@ -1,4 +1,5 @@
 <resources>
 
+    <bool name="nc__log_enabled">true</bool>
 
 </resources>

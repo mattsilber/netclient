@@ -4,9 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#34495e"
     android:orientation="vertical"
+    android:padding="24dp"
     tools:context=".MainActivity">
 
+    <com.guardanis.fontutils.Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="Test GET"
+        android:textSize="16sp"
+        android:onClick="testGetClicked"/>
 
+    <com.guardanis.fontutils.Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="Test POST"
+        android:textSize="16sp"
+        android:onClick="testPostClicked"/>
 
 </LinearLayout>

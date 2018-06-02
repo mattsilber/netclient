@@ -1,6 +1,10 @@
 <resources>
 
-    <string name="app_name">Collection Utils Sample</string>
+    <string name="app_name">Netclient Sample</string>
+
+
+    <string name="nc__api_url">https://jsonplaceholder.typicode.com/</string>
+
 
 
     <string name="alert_action_ok">Ok</string>

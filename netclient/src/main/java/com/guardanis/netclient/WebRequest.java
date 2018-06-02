@@ -304,12 +304,17 @@ public class WebRequest<T> implements Runnable {
     }
 
     protected WebResult makeRequest(HttpURLConnection conn, String params) throws Exception {
-        OutputStreamHelper streamHelper = new OutputStreamHelper(conn);
-        streamHelper.write(params);
+        OutputStreamHelper streamHelper = null;
+
+        if (OutputStreamHelper.isWritingAllowed(params)) {
+            streamHelper = OutputStreamHelper.createWritableInstance(conn);
+            streamHelper.writeOrIgnore(params);
+        }
 
         WebResult response = readResponse(conn);
 
-        streamHelper.closeConnection();
+        if (streamHelper != null)
+            streamHelper.closeConnection();
 
         NetUtils.getInstance(context)
                 .log("Server response: " + response.getUnparsedResponse());
