@@ -16,7 +16,7 @@ import java.util.List;
 public class DefaultErrorParser implements ErrorParser {
 
     @Override
-    public List<String> parseErrorMessages(Context context, WebResult result) {
+    public RequestError parseErrorMessages(Context context, WebResult result) {
         List<String> errorMessages = new ArrayList<String>();
 
         try{
@@ -33,7 +33,10 @@ public class DefaultErrorParser implements ErrorParser {
         if(!result.isSuccessful() && errorMessages.size() < 1)
             errorMessages.add(context.getString(R.string.nc__error_unknown));
 
-        return errorMessages;
+        if (errorMessages.size() < 1)
+            return null;
+
+        return new RequestError(result, errorMessages);
     }
 
     private List<String> parseErrors(Context context, JSONObject obj) {

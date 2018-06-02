@@ -67,6 +67,12 @@ public class WebResult {
     }
 
     public JSONObject getResponseJson() {
+        JSONObject response = getResponseJsonOrNull();
+
+        return response == null ? new JSONObject() : response;
+    }
+
+    public JSONObject getResponseJsonOrNull() {
         try{
             return new JSONObject(unparsedResponse);
         }

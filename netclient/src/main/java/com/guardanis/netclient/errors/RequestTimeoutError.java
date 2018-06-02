@@ -8,6 +8,7 @@ public class RequestTimeoutError extends RequestError {
 
     public RequestTimeoutError(Context context) {
         super(context.getString(R.string.nc__error_timed_out));
-    }
 
+        this.connectionIssue = true;
+    }
 }

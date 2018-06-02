@@ -351,13 +351,13 @@ public class WebRequest<T> implements Runnable {
     protected RequestError getErrorsFromResult(WebResult result){
         ErrorParser activeParser = getErrorParser();
 
-        List<String> errors = activeParser == null
+        RequestError errors = activeParser == null
                 ? null
                 : activeParser.parseErrorMessages(context, result);
 
-        return errors == null || errors.size() < 1
+        return errors == null || errors.getErrors().isEmpty()
                 ? null
-                : new RequestError(result, errors);
+                : errors;
     }
 
     protected ErrorParser getErrorParser(){

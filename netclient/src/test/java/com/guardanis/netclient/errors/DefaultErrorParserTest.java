@@ -23,7 +23,8 @@ public class DefaultErrorParserTest {
         WebResult result = new WebResult(400, "{\"errors\":{\"base\":[\"Some base error occurred\"]}}\n");
 
         List<String> errorMessages = new DefaultErrorParser()
-                .parseErrorMessages(mockedContext, result);
+                .parseErrorMessages(mockedContext, result)
+                .errors;
 
         RequestError errors = new RequestError(result, errorMessages);
 
@@ -36,7 +37,8 @@ public class DefaultErrorParserTest {
         WebResult result = new WebResult(400, "{\"errors\":{\"key\":[\"has some issue\"]}}\n");
 
         List<String> errorMessages = new DefaultErrorParser()
-                .parseErrorMessages(mockedContext, result);
+                .parseErrorMessages(mockedContext, result)
+                .errors;
 
         RequestError errors = new RequestError(result, errorMessages);
 
@@ -49,7 +51,8 @@ public class DefaultErrorParserTest {
         WebResult result = new WebResult(400, "{\"errors\":{\"key\":[\"has some issue\", \"has some other issue\"]}}\n");
 
         List<String> errorMessages = new DefaultErrorParser()
-                .parseErrorMessages(mockedContext, result);
+                .parseErrorMessages(mockedContext, result)
+                .errors;
 
         RequestError errors = new RequestError(result, errorMessages);
 

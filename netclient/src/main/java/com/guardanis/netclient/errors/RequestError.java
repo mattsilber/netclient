@@ -10,7 +10,9 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLException;
 
@@ -20,7 +22,7 @@ public class RequestError {
 
     protected WebResult response;
 
-    protected Throwable throwable;
+    protected Map<String, Object> extras = new HashMap<String, Object>();
     protected boolean connectionIssue = false;
 
     public RequestError(Context context, Throwable throwable) {
@@ -29,7 +31,6 @@ public class RequestError {
 
     public RequestError(Context context, WebResult response, Throwable throwable) {
         this.response = response;
-        this.throwable = throwable;
 
         if(throwable == null)
             errors.add(context.getResources()
@@ -65,6 +66,20 @@ public class RequestError {
         return 0 < errors.size();
     }
 
+    public Map<String, Object> getExtras() {
+        return extras;
+    }
+
+    public RequestError setExtras(Map<String, Object> extras) {
+        this.extras = extras;
+        return this;
+    }
+
+    public RequestError putExtra(String key, Object data){
+        this.extras.put(key, data);
+        return this;
+    }
+
     @Override
     public String toString() {
         return toString("\n");
@@ -96,17 +111,9 @@ public class RequestError {
     }
 
     /**
-     * @return The Throwable reason the request failed, or null if there is none
-     */
-    public Throwable getThrowable() {
-        return throwable;
-    }
-
-    /**
      * @return the WebResult response, or null if there is none
      */
     public WebResult getResponse() {
         return response;
     }
-
 }
